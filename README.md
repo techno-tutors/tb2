@@ -8,6 +8,7 @@ This has 2 mode, Interactive and basic commands.
 ## About
 - *[Installation](#how-to-install)*
 - *[Usage](#usage)*
+- *[Example](#example)*
 - *[License](#license)*
 - *[Contribute Rules](#contribute)*
 
@@ -16,19 +17,19 @@ This has 2 mode, Interactive and basic commands.
 
 ### use GIT
 ```sh
-git clone https://GitHub.com/techno-tutors/tb2.git;
+git clone https://github.com/techno-tutors/tb2.git;
 cd tb2;
 sh ./install.sh;
 ```
 
 ### use CURL
 ```sh
-curl -fsSL https://raw.GitHubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | sh
 ```
 
 ### use WGET
 ```sh
-wget -qO- https://raw.GitHubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | sh
+wget -qO- https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | sh
 ```
 
 ## Usage
@@ -38,15 +39,14 @@ wget -qO- https://raw.GitHubusercontent.com/techno-tutors/tb2/refs/heads/main/in
 
 ### subcmd "book"
 ```sh
-tb2 book new -b NAME
+tb2 book new -b BOOKNAME
 #または
-tb2 book new NAME
+tb2 book new BOOKNAME
 ```
 新しい本NAMEを作成します。
 
 #### GitHubの動き
-- GitHub ProjectへNAMEが追加されます。
-- `-l`でGitHubへの自動適用を防止します。
+- GitHub ProjectへBOOKNAMEが追加されます。
 
 ___
 
@@ -59,9 +59,9 @@ ___
 
 ### subcmd "chapter"
 ```sh
-tb2 chapter new -c NAME -b BOOKNAME
+tb2 chapter new -c CHAPTERNAME -b BOOKNAME
 #または
-tb2 chapter new BOOKNAME/NAME
+tb2 chapter new BOOKNAME/CHAPTERNAME
 ```
 新しいチャプターNAMEを本BOOKNAMEに作成します。
 
@@ -74,7 +74,7 @@ ___
 ```sh
 tb2 chapter save -c CHAPTERNAME -b BOOKNAME
 #または
-tb2 chapter save CHAPTERNAME BOOKNAME
+tb2 chapter save BOOKNAME/CHAPTERNAME
 ```
 チャプターを保存します。
 
@@ -85,6 +85,8 @@ ___
 
 ```sh
 tb2 chapter list -b BOOKNAME
+#または
+tb2 chapter list BOOKNAME
 ```
 本BOOKNAMEのチャプター一覧を表示します。
 
@@ -135,6 +137,56 @@ ___
 ```sh
 tb2 [-i]
 ```
+
+## Example
+TB2を使うと、教科書制作のGitHub作業やディレクトリいじり、テンプレの適用などが自動化されます。
+以下は、ツール直打ち（対話モードではない）で、本→チャプター→ページを作る一連の例です。
+
+### 1. **本を作る**
+```sh
+tb2 book new Crypto
+```
+- GitHub Projectに`Crypto`が追加されます
+-bで明示的にBOOKNAMEを指定してもいいけど略しても変わらん。
+
+### 2. **チャプターを作る**
+```sh
+tb2 chapter new Crypto/RSA
+#もしくは
+tb2 chapter new -b Crypto -c RSA
+```
+- `draft`ブランチから`chapter/RSA`ブランチが作成されます
+- "RSA"のIssueがProject(Crypto)に作成されます
+
+### 3. **ページを書く**
+```sh
+tb2 page new Crypto/RSA/WhatIsRSA
+```
+ここで`-c`,`-b`,`-p`でわざわざ指定するのはめんどい。短縮形を使おう。
+- Sub-Issue が作成されます
+- `WhatIsRSA.md`が作成されます
+
+### 4. **編集**
+### 5. **ページを保存する**
+```sh
+tb2 page save Crypto/RSA/WhatIsRSA
+```
+- 変更がcommit&pushされます
+
+### 6. **チャプターを完成させる**
+```sh
+tb2 chapter save Crypto/RSA
+```
+- `chapter/RSA`ブランチから`draft`ブランチにPRがつくられます。
+- RSA chapterのissueはDONEやclosedにはなりません
+
+### 7. **満足する**
+```sh
+tb2 project list -page
+```
+- 本 → チャプター → ページ の階層が一覧表示されます
+自分が成し遂げた成果を見渡そう。
+
 
 ## LICENSE
 ISC License. It is almost the same as MIT License.
