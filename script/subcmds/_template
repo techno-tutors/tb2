@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+base_dir=$(dirname "${BASH_SOURCE[0]}" && pwd)
+source "$base_dir/utils.sh"
+
