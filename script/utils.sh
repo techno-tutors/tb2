@@ -64,5 +64,20 @@ function mdbook.chkAvailable() {
     warn "This directory is not root of mdBook project. Please run this command in the root directory of your mdBook project.\n"
     return 1
   fi
+  # Check src directory exists
+  info "Checking mdBook 'src' directory existence..."
+  info "Lookig for default source directory config"
+  srcdir=""
+  run "srcdir=$base_dir/tb2" config --get 'MDBOOK_SRCDIR' >/dev/null 2>&1
+  if [[ -z "$srcdir" ]]; then
+    info "No custom source directory configured. Using default 'src'."
+    srcdir="src"
+  else
+    info "Using configured source directory: '$srcdir'"
+  fi
+  if [[ ! -d "$srcdir" ]]; then
+    warn "mdBook '$srcdir' directory not found. Please ensure you are in a valid mdBook project directory.\n"
+    return 1
+  fi
   return 0
 }
