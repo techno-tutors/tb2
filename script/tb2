@@ -9,6 +9,16 @@ source "$base_dir/utils.sh"
 #    TB2: TextBook ToolBox       #
 #--------------------------------#
 
+if ! mdbook.chkAvailable; then
+  warn "Exit.."
+  exit 1
+fi
+
+if ! gh.chkAvailable; then
+  warn "Exit.."
+  exit 1
+fi
+
 case "${1:-}" in
   ""|"-i")
     "$base_dir/interactive/main.sh" "${@:2}"

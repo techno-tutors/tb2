@@ -6,3 +6,7 @@ USR_NAME=""
 # then if this is true, you should where's the new file.
 # else if this is false, tb2 will make a directory "DRAFT_PAGES" to your computer, and you will open it easily.
 DIRECT_EDIT=false
+
+# default series name, this will be use for new book creation.
+# when you create new book, tb2 will create a github project "SERIESNAME/BOOKNAME".
+SERIESNAME=""
