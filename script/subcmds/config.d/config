@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+#? Write your subcommand description here
+#? You can write mulitple lines of description.
+#? Usage: tb2 config <subcmd> [options]
+#? Subcommands:
+#?   set KEY VALUE      Set a configuration value
+#?   get KEY            Get a configuration value
+#? Opts:
+#? Keys:
+#?   directedit
+#?   orgname
+#?   usrname
+
+set -euo pipefail
+
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
+source "$base_dir/utils.sh"
+
+CONFIG_FILE="$base_dir/subcmds/config.d/config.list"
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+  error "Config file not found: $CONFIG_FILE\n"
+  exit 1
+fi
+source "$CONFIG_FILE"
+
+getConf() {
+  local key="$1"
+  load_config
+  
+  case "$key" in
+    orgname)
+      info "$ORG_NAME"
+      ;;
+    usrname)
+      info "$USR_NAME"
+      ;;
+    directedit)
+      info "$DIRECT_EDIT"
+      ;;
+    *)
+      warn "Unknown key: $key\n"
+      return 1
+      ;;
+  esac
+}
+setConf() {
+  local key="$1"
+  local value="$2"
+  
+  if [[ ! -f "$CONFIG_FILE" ]]; then
+    error "Config file not found: $CONFIG_FILE\n"
+    exit 1
+  fi
+  
+  case "$key" in
+    orgname)
+      sed -i "s/^ORG_NAME=\"\"/ORG_NAME=\"$value\"/" "$CONFIG_FILE"
+      log "Set ORG_NAME to: $value"
+      ;;
+    usrname)
+      sed -i "s/^USR_NAME=\"\"/USR_NAME=\"$value\"/" "$CONFIG_FILE"
+      log "Set USR_NAME to: $value"
+      ;;
+    directedit)
+      if [[ "$value" =~ ^(true|false)$ ]]; then
+        sed -i "s/^DIRECT_EDIT=.*/DIRECT_EDIT=$value/" "$CONFIG_FILE"
+        log "Set DIRECT_EDIT to: $value"
+      else
+        warn "Invalid value for directedit. Use 'true' or 'false'\n"
+        return 1
+      fi
+      ;;
+    *)
+      warn "Unknown key: $key\n"
+      return 1
+      ;;
+  esac
+}
+
+case "${1:-}" in
+    get)
+      if [[ $# -lt 2 ]]; then
+        error "Key required for 'get' subcommand\n"
+        exit 1
+      fi
+      getConf "$2"
+      ;;
+    set)
+      if [[ $# -lt 3 ]]; then
+        error "Key and value required for 'set' subcommand\n"
+        exit 1
+      fi
+      setConf "$2" "$3"
+      ;;
+    *)
+      error "Unknown subcommand: $subcmd\n"
+      exit 1
+      ;;
+  esac
