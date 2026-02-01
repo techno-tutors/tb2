@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck
+        run: shellcheck **/*.sh
+
+      - name: Install shfmt
+        run: sudo apt-get install -y shfmt
+
+      - name: Run shfmt (warnings only)
+        continue-on-error: true
+        run: |
+          echo "Running shfmt warnings (non-blocking)"
+          shfmt -i 2 -l .
+
+      - name: Run shfmt (strict indent check)
+        run: shfmt -i 2 -d .
+
+      - name: Check strict mode (set -euo pipefail)
+        run: |
+          for f in $(find . -name "*.sh"); do
+            if ! grep -q "set -euo pipefail" "$f"; then
+              echo "Strict mode missing in $f"
+              exit 1
+            fi
+          done
+
+      - name: Check shebang (#!/usr/bin/env bash)
+        run: |
+          for f in $(find . -name "*.sh"); do
+            first_line=$(head -n1 "$f")
+            if [ "$first_line" != "#!/usr/bin/env bash" ]; then
+              echo "Bad shebang in $f: $first_line"
+              exit 1
+            fi
+          done
