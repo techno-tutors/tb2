@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+#? Write your subcommand description here
+#? You can write mulitple lines of description.
+
+set -euo pipefail
+
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
+source "$base_dir/utils.sh"
+
+case "${1:-}" in
+  "")
+    warn "No subcmd provided for 'book'"
+    exit 1
+  "new")
+    shift
+    
+esac

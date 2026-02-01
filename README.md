@@ -197,9 +197,11 @@ ISC License. It is almost the same as MIT License.
 - Code Lang: Bash
 - Code style: Mustn't use external command usually.
 - Dir:
-  - /install.sh
-  - /script/tb2
-  - /script/subcmds/subcmd_name
+  - /install.sh[bash]
+  - /script/tb2[bash]
+  - /script/subcmds/subcmdname.d[dir]
+  - /script/subcmds/subcmdname.d/cmdname[bash]
+  - /script/subcmds/subcmdname.d/subcmds/subsubcmdname[bash]
 - Indent: 2 spaces or tab
 - You havta do `shfmt`
 - You havta add `set -euo pipfail` to head of bash file

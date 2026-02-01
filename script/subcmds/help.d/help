@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/.."
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
 subcmd_dir="$base_dir/subcmds"
 
 source "$base_dir/utils.sh"
@@ -22,15 +22,18 @@ log  "  It manages Books, Chapters, Pages, Issues, Branches, and Projects."
 echo
 
 info "SUBCOMMANDS"
-for cmd in "$subcmd_dir"/*; do
-  name=$(basename "$cmd")
-  if [[ "$name" == "_template" ]]; then
-    continue
+for dir in "$subcmd_dir"/*.d; do
+  name=$(basename "$dir" | sed 's/\.d$//')
+  [[ "$name" == "_template" ]] && continue
+  main_cmd="$dir/$name"
+  if [[ -f "$main_cmd" ]]; then
+    desc=$(grep '^#?' "$main_cmd" | sed 's/^#? //' | sed 's/^/      /')
+  else
+    desc="      (no description)"
   fi
-  desc=$(grep '^#?' "$cmd" | sed 's/^#? //' | sed 's/^/      /')
-  [[ -z "$desc" ]] && desc="      (no description)"
   printf "  %-10s\n%s\n" "$name" "$desc"
 done
+
 
 echo
 

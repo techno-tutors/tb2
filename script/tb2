@@ -11,17 +11,17 @@ source "$base_dir/utils.sh"
 
 case "${1:-}" in
   ""|"-i")
-    "$base_dir/subcmds/interactive"
+    "$base_dir/interactive/main.sh" "${@:2}"
     ;;
   "--help"|"-h")
-    "$base_dir/subcmds/help"
+    "$base_dir/subcmds/help.d/help"
     ;;
   *)
-    if [[ ! -f "$base_dir/subcmds/$1" || -x "$base_dir/subcmds/$1" ]]; then
+    if [[ ! -f "$base_dir/subcmds/${1}.d/$1" || -x "$base_dir/subcmds/${1}.d/$1" ]]; then
       error "Unknown subcommand: $1"
-      info "Run './tb2 --help' for usage."
+      info "Run '$0 --help' for usage."
       exit 1
     fi
-    "$base_dir/subcmds/$1" "${@:2}"
+    "$base_dir/subcmds/${1}.d/$1" "${@:2}"
     ;;
 esac
