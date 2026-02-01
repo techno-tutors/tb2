@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#? Write your subcommand description here
+#? You can write mulitple lines of description.
 
 set -euo pipefail
 

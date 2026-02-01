@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ESC=$'\e['
-YELLOW="33m"
-RED="31m"
-GREEN="32m"
-BLUE="34m"
-BOLD="1m"
-RESET="0m"
+ESC="\033["
+RESET="${ESC}0m"
+BOLD="${ESC}1m"
+BLUE="${ESC}34m"
+YELLOW="${ESC}33m"
+RED="${ESC}31m"
+GREEN="${ESC}32m"
 
 function log(){
-  printf "[+] %s\n" "$1"
+  printf "%b" "[+] $1\n"
 }
 function info(){
-  printf "${ESC}${BLUE}[*]${ESC}${RESET} %s\n" "$1"
+  printf "%b" "${BLUE}${BOLD}[*]${RESET} $1 \n"
 }
 function warn(){
-  printf "${ESC}${YELLOW}[!]${ESC}${RESET} %s\n" "$1"
+  printf "%b" "${YELLOW}${BOLD}[!]${RESET} $1 \n"
 }
 function error(){
-  printf "${ESC}${RED}[-]${ESC}${RESET} %s\n" "$1"
+  printf "%b" "${RED}${BOLD}[-]${RESET} $1"
 }
 function ask(){
-  read -p "$(printf "${ESC}${BOLD}${ESC}${GREEN}[?]${ESC}${RESET} %s\n\t${ESC}${BOLD}${ESC}${GREEN}>>${ESC}${RESET}" "$1")" answer
+  read -p "$(printf "%b" "${BOLD}${GREEN}[?]${RESET}$1\n\t${BOLD}${GREEN}>>${RESET}")" answer
   echo "$answer"
 }
 function run(){
