@@ -200,3 +200,7 @@ ISC License. It is almost the same as MIT License.
   - /install.sh
   - /script/tb2
   - /script/subcmds/subcmd_name
+- Indent: 2 spaces or tab
+- You havta do `shfmt`
+- Shebang is allowd only `#!/us/bin/env bash`
+- tag `v*` commit to Release
