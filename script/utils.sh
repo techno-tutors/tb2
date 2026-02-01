@@ -26,6 +26,6 @@ function ask(){
   echo "$answer"
 }
 function run(){
-  info "Run: $*"
+  info "Runnning> $*"
   "$@"
 }

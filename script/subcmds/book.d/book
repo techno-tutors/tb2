@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
-#? Write your subcommand description here
-#? You can write mulitple lines of description.
+
+#? Usage: tb2 book <subcmd> [options]
+#? Subcommands:
+#?   new       Create a new book project
+#?   list      List existing book projects
+#? Opts:
+#?   -b        BOOKNAME
 
 set -euo pipefail
 
@@ -11,7 +16,17 @@ case "${1:-}" in
   "")
     warn "No subcmd provided for 'book'"
     exit 1
+    ;;
   "new")
     shift
-    
+    "$base_dir/subcmds/book.d/subcmds/new" "$@"
+    ;;
+  "list")
+    shift
+    "$base_dir/subcmds/book.d/subcmds/list" "$@"
+    ;;
+  *)
+    warn "Unknown subcmd '$1' for 'book'"
+    exit 1
+    ;;
 esac

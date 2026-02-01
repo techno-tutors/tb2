@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#? Show tb2 help message
+#? Show tb2 help message(this)
 
 set -euo pipefail
 

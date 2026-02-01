@@ -18,7 +18,7 @@ case "${1:-}" in
     ;;
   *)
     if [[ ! -f "$base_dir/subcmds/${1}.d/$1" || -x "$base_dir/subcmds/${1}.d/$1" ]]; then
-      error "Unknown subcommand: $1"
+      warn "Unknown subcommand: $1"
       info "Run '$0 --help' for usage."
       exit 1
     fi
