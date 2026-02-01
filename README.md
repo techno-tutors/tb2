@@ -202,5 +202,6 @@ ISC License. It is almost the same as MIT License.
   - /script/subcmds/subcmd_name
 - Indent: 2 spaces or tab
 - You havta do `shfmt`
+- You havta add `set -euo pipfail` to head of bash file
 - Shebang is allowd only `#!/us/bin/env bash`
 - tag `v*` commit to Release
