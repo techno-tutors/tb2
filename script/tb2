@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+source ./utils.sh
+
+#--------------------------------#
+#    TB2: TextBook ToolBox       #
+#--------------------------------#
+
+case "$1" in
+  "")
+    ./subcmds/interactive.sh
+    log "Welcome to TB2!"
+    log "Use './tb2 help' to see available commands."
+    ;;
+  
+esac
