@@ -25,9 +25,16 @@ function ask(){
   read -p "$(printf "%b" "${BOLD}${GREEN}[?]${RESET}$1\n\t${BOLD}${GREEN}>>${RESET}")" answer
   echo "$answer"
 }
+function catch(){
+  if [[ $? -ne 0 ]]; then
+    error "Command failed with exit code $?."
+  else 
+    info "Command executed successfully."
+  fi
+}
 function run(){
   info "Runnning> $*"
-  "$@"
+  "$@"||catch
 }
 function gh.chkAvailable() {
   # Check if gh is installed
