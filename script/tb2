@@ -1,17 +1,27 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-source ./utils.sh
+
+base_dir=$(dirname "${BASH_SOURCE[0]}")
+source "$base_dir/utils.sh"
 
 #--------------------------------#
 #    TB2: TextBook ToolBox       #
 #--------------------------------#
 
-case "$1" in
-  "")
-    ./subcmds/interactive.sh
-    log "Welcome to TB2!"
-    log "Use './tb2 help' to see available commands."
+case "${1:-}" in
+  ""|"-i")
+    "$base_dir/subcmds/interactive"
     ;;
-  
+  "--help"|"-h")
+    "$base_dir/subcmds/help"
+    ;;
+  *)
+    if [[ ! -f "$base_dir/subcmds/$1" || -x "$base_dir/subcmds/$1" ]]; then
+      error "Unknown subcommand: $1"
+      info "Run './tb2 --help' for usage."
+      exit 1
+    fi
+    "$base_dir/subcmds/$1" "${@:2}"
+    ;;
 esac
