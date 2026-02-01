@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-base_dir=$(dirname "${BASH_SOURCE[0]}")/..
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/.."
 subcmd_dir="$base_dir/subcmds"
 
 source "$base_dir/utils.sh"
