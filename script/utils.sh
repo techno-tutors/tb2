@@ -26,15 +26,19 @@ function ask(){
   echo "$answer"
 }
 function catch(){
-  if [[ $? -ne 0 ]]; then
+  if [[ $1 -ne 0 ]]; then
     error "Command failed with exit code $?."
+    return 2
   else 
     info "Command executed successfully."
+    return 0
   fi
 }
 function run(){
   info "Runnning> $*"
-  "$@"||catch
+  "$@"
+  catch $?
+  return $?
 }
 function gh.chkAvailable() {
   # Check if gh is installed
