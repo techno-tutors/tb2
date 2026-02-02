@@ -20,23 +20,24 @@ CONFIG_FILE="$base_dir/subcmds/config.d/config.list"
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
   error "Config file not found: $CONFIG_FILE\n"
-  exit 1
+  exit 2
 fi
 source "$CONFIG_FILE"
 
 getConf() {
   local key="$1"
-  load_config
-  
   case "$key" in
-    orgname)
-      info "$ORG_NAME"
+    "GH_OWNER_NAME")
+      echo "$GH_OWNER_NAME"
       ;;
-    usrname)
-      info "$USR_NAME"
+    "TB2_DIRECT_EDIT")
+      echo "$TB2_DIRECT_EDIT"
       ;;
-    directedit)
-      info "$DIRECT_EDIT"
+    "MDBOOK_SERIES_NAME")
+      echo "$MDBOOK_SERIES_NAME"
+      ;;
+    "MDBOOK_SRC_DIR")
+      echo "$MDBOOK_SRC_DIR"
       ;;
     *)
       warn "Unknown key: $key\n"
@@ -54,22 +55,17 @@ setConf() {
   fi
   
   case "$key" in
-    orgname)
-      sed -i "s/^ORG_NAME=\"\"/ORG_NAME=\"$value\"/" "$CONFIG_FILE"
-      log "Set ORG_NAME to: $value"
+    "GH_OWNER_NAME")
+      sed -i.bak "s|^GH_OWNER_NAME=.*$|GH_OWNER_NAME=\"$value\"|" "$CONFIG_FILE"
       ;;
-    usrname)
-      sed -i "s/^USR_NAME=\"\"/USR_NAME=\"$value\"/" "$CONFIG_FILE"
-      log "Set USR_NAME to: $value"
+    "TB2_DIRECT_EDIT")
+      sed -i.bak "s|^TB2_DIRECT_EDIT=.*$|TB2_DIRECT_EDIT=$value|" "$CONFIG_FILE"
       ;;
-    directedit)
-      if [[ "$value" =~ ^(true|false)$ ]]; then
-        sed -i "s/^DIRECT_EDIT=.*/DIRECT_EDIT=$value/" "$CONFIG_FILE"
-        log "Set DIRECT_EDIT to: $value"
-      else
-        warn "Invalid value for directedit. Use 'true' or 'false'\n"
-        return 1
-      fi
+    "MDBOOK_SERIES_NAME")
+      sed -i.bak "s|^MDBOOK_SERIES_NAME=.*$|MDBOOK_SERIES_NAME=\"$value\"|" "$CONFIG_FILE"
+      ;;
+    "MDBOOK_SRC_DIR")
+      sed -i.bak "s|^MDBOOK_SRC_DIR=.*$|MDBOOK_SRC_DIR=\"$value\"|" "$CONFIG_FILE"
       ;;
     *)
       warn "Unknown key: $key\n"
