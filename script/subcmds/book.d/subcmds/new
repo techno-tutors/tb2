@@ -27,6 +27,8 @@ seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIESNAME')
 name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
 if [[ -z "$seriesName" ]]; then
   warn "MDBOOK_SERIESNAME is not set in the configuration."
+  log "Please set it using 'tb2 config --set MDBOOK_SERIESNAME your_series_name'"
+  info "Exit."
   exit 1
 fi
 if [[ -z "$name" ]]; then
@@ -54,9 +56,9 @@ if [[ -z "$name" ]]; then
 fi
 
 if [[ -n "$name" ]]; then
-  run "gh project create \"$name/$seriesName-$bookname\" ..."
+  run "gh project create --owner \"$name\" --public --title \"$seriesName-$bookname\" --description \"Book project '$bookname'\""
 else
-  run "gh project create \"$seriesName-$bookname\" ..."
+  run "script -q -c 'gh project create --public --title \"$seriesName-$bookname\" --description \"Book project '$bookname'\"'"
 fi
 log "Checking status of the project creation..."
 if [[ -z "$name" ]]; then
@@ -78,15 +80,13 @@ if [[ -z "$MDBOOK_SRC_DIR" ]]; then
   warn "MDBOOK_SRC_DIR is not set in the configuration. Using default 'src'."
   MDBOOK_SRC_DIR="src"
 fi
-if [[ -d "$bookname" ]]; then
-  warn "Directory '$bookname' already exists locally. Skipping mkdir."
+if [[ -d "$MDBOOK_SRC_DIR/$bookname" ]]; then
+  warn "Directory '$MDBOOK_SRC_DIR/$bookname' already exists locally. Skipping mkdir."
 else
-  log "Creating local directory '$bookname'..."
-  run "cd \"$MDBOOK_SRC_DIR\""
-  run "mkdir \"$bookname\""
-  run "cd - >/dev/null 2>&1"
+  log "Creating local directory '$MDBOOK_SRC_DIR/$bookname'..."
+  run "mkdir \"$MDBOOK_SRC_DIR/$bookname\""
   ls "$MDBOOK_SRC_DIR/$bookname" >/dev/null 2>&1 || {
-    error "Failed to create or access local directory '$bookname'."
+    error "Failed to create or access local directory '$MDBOOK_SRC_DIR/$bookname'."
     exit 1
   }
 fi
@@ -109,8 +109,8 @@ if [[ -z "$branch" ]]; then
     exit 1
   fi
   if [[ "$ans" == "s" || "$ans" == "S" ]]; then
-    name=$(ask "What's your TB2_OPERATION_BRANCH?")
-    run "$base_dir/tb2 config set TB2_OPERATION_BRANCH \'$name\'"
+    branch=$(ask "What's your TB2_OPERATION_BRANCH?")
+    run "$base_dir/tb2 config set TB2_OPERATION_BRANCH \'$branch\'"
     log "Checking..."
     branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
     if [[ -z "$branch" ]]; then
@@ -123,39 +123,32 @@ if [[ -z "$branch" ]]; then
 fi
 log "Using branch: $branch"
 log "Checking if exist of branch name..."
-run "git branch --list \"$branch\" | grep -q \"$branch\" >/dev/null 2>&1"
-if [[ $? -ne 0 ]]; then
-  log "Branch '$branch' does not exist."
-  ans=$(ask "Create branch[c] or Exit[e]?")
-  if [[ "$ans" == "c" || "$ans" == "C" ]]; then
-    run "git checkout -b $branch"
-    log "done."
+if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null||echo)" != "$branch" ]]; then
+  log "Branch '$branch' is not current branch."
+  log "Checking for branch existence..."
+  if git branch --list "$branch" >/dev/null 2>&1; then
+    log "Branch '$branch' exists."
   else
-    info "Exit."
-    exit 0
-  fi
-else
-  log "Cheking for current branch..."
-  if git branch --list "$branch" | grep -q "$branch" >/dev/null 2>&1; then
-    log "Already on branch '$branch'."
-    log "done."
-    exit 0
-  else 
-    log "Not on branch '$branch'."
-    ans=$(ask "Switch to branch '$branch'? (y/n)")
-    if [[ "$ans" == "y" || "$ans" == "Y" ]]; then
-      run "git checkout $branch"
+    log "Branch '$branch' does not exist."
+    ans=$(ask "Create branch[c] or Exit[e]?")
+    if [[ "$ans" == "c" || "$ans" == "C" ]]; then
+      run "git switch -c $branch"
       log "done."
     else
       info "Exit."
-      exit 1
+      exit 0
     fi
   fi
+  log "Switching to branch '$branch'..."
+  run "git switch $branch"
+  log "done."
+else
+  log "Already on branch '$branch'."
   log "done."
 fi
 
-run "git add $MDBOOK_SRC_DIR/$bookname"
-run "git commit -m \'Initial commit for book $bookname\'"
+run "git add \"$MDBOOK_SRC_DIR/$bookname\""
+run "git commit -m \"Initial commit for book $bookname\""
 run "git push -u origin $branch"
 log "done."
 info "New book project '$bookname' created successfully."
