@@ -14,4 +14,5 @@ MDBOOK_SERIES_NAME=""
 MDBOOK_SRC_DIR=""
 
 # branch name for mdbook deployment by using tb2
-TB2_OPERATION_BRANCH="gh-pages"
+TB2_OPERATION_BRANCH=""
+
