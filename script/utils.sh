@@ -27,7 +27,7 @@ function ask(){
 }
 function catch(){
   if [[ $1 -ne 0 ]]; then
-    error "Command failed with exit code $?."
+    error "Command failed with exit code $1."
     return 2
   else 
     info "Command executed successfully."
