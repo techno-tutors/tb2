@@ -12,3 +12,6 @@ MDBOOK_SERIES_NAME=""
 
 # default mdbook source directory(empty for use "src")
 MDBOOK_SRC_DIR=""
+
+# branch name for mdbook deployment by using tb2
+TB2_OPERATION_BRANCH="gh-pages"
