@@ -23,10 +23,14 @@ while getopts "b:q" opt; do
       warn "Unknown option: -$OPTARG"
       exit 1
       ;;
+    :)
+      warn "Option -$OPTARG requires an argument."
+      exit 1
+      ;;
   esac
 done
 if [[ -z "${bookname}" ]]; then
-  warn "Book name via -b opt is required."
+  warn "Option -b requires an argument."
   info "Exit."
   exit 1
 fi
