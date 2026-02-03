@@ -19,8 +19,8 @@ while getopts "b:q" opt; do
     q)
       exit_missConf=true
       ;;
-    *)
-      warn "Invalid option: -$OPTARG"
+    \?)
+      warn "Unknown option: -$OPTARG"
       exit 1
       ;;
   esac

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-#? Write your subcommand description here
-#? You can write mulitple lines of description.
+#? List existing book both remote and local
 #? Usage: tb2 book list
 #? config dependencies: GH_OWNER_NAME, MDBOOK_SERIES_NAME, MDBOOK_SRC_DIR
 
