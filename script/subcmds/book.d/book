@@ -4,8 +4,6 @@
 #? Subcommands:
 #?   new       Create a new book project
 #?   list      List existing book projects
-#? Opts:
-#?   -b        BOOKNAME
 
 set -euo pipefail
 

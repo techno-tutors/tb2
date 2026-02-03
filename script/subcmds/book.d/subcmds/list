@@ -25,3 +25,4 @@ run "gh project list --owner \"${name}\" | grep \"${seriesName}-\""
 info "=Local [mdBook directory: ./${base_dir}/]="
 run "ls -d ./${srcDir:-src}/*/ | grep \"${seriesName}-\" || echo 'No local books found.'"
 log "========================"
+exit 0
