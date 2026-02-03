@@ -10,11 +10,11 @@ set -euo pipefail
 base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
 source "$base_dir/utils.sh"
 
-bookname=""
+bookName=""
 while getopts "b:q" opt; do
   case $opt in
     b)
-      bookname="$OPTARG"
+      bookName="$OPTARG"
       ;;
     q)
       exit_missConf=true
@@ -29,7 +29,7 @@ while getopts "b:q" opt; do
       ;;
   esac
 done
-if [[ -z "${bookname}" ]]; then
+if [[ -z "${bookName}" ]]; then
   warn "Option -b requires an argument."
   info "Exit."
   exit 1
@@ -45,10 +45,10 @@ checkConf true "MDBOOK_SERIESNAME" "GITHUB_OWNERNAME" "MDBOOK_SRC_DIR" "TB2_OPER
 mustVar true "seriesName" "name" "srcDir" "branch"
 log "done."
 
-info "Creating new book GitHub Project: $bookname"
-run "gh project create --owner \"$name\" --public --title \"$seriesName-$bookname\" --description \"Book project '$bookname'\""
+info "Creating new book GitHub Project: $bookName"
+run "gh project create --owner \"$name\" --public --title \"$seriesName-$bookName\" --description \"Book project '$bookName'\""
 log "Checking status of the project creation..."
-run "gh project list --owner=\"$name\" | grep -q \"$seriesName-$bookname\" >/dev/null 2>&1"
+run "gh project list --owner=\"$name\" | grep -q \"$seriesName-$bookName\" >/dev/null 2>&1"
 if [[ $? -ne 0 ]]; then
   error "Failed to create the project on GitHub."
   exit 1
@@ -58,13 +58,13 @@ log "Project created on GitHub successfully."
 
 log "Checking for local directory..."
 
-if [[ -d "$srcDir/$bookname" ]]; then
-  warn "Directory '$srcDir/$bookname' already exists locally. Skipping mkdir."
+if [[ -d "$srcDir/$bookName" ]]; then
+  warn "Directory '$srcDir/$bookName' already exists locally. Skipping mkdir."
 else
-  log "Creating local directory '$srcDir/$bookname'..."
-  run "mkdir \"$srcDir/$bookname\""
-  ls "$srcDir/$bookname" >/dev/null 2>&1 || {
-    error "Failed to create or access local directory '$srcDir/$bookname'."
+  log "Creating local directory '$srcDir/$bookName'..."
+  run "mkdir \"$srcDir/$bookName\""
+  ls "$srcDir/$bookName" >/dev/null 2>&1 || {
+    error "Failed to create or access local directory '$srcDir/$bookName'."
     exit 1
   }
 fi
@@ -100,9 +100,9 @@ else
   log "done."
 fi
 
-run "git add \"$srcDir/$bookname\""
-run "git commit -m \"Initial commit for book $bookname\""
+run "git add \"$srcDir/$bookName\""
+run "git commit -m \"Initial commit for book $bookName\""
 run "git push -u origin $branch"
 log "done."
-info "New book project '$bookname' created successfully."
+info "New book project '$bookName' created successfully."
 exit 0
