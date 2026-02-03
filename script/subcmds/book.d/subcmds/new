@@ -8,7 +8,7 @@
 #? config dependencies: MDBOOK_SERIESNAME, GITHUB_OWNERNAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
 source "$base_dir/utils.sh"
 
 bookname=""

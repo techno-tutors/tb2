@@ -6,7 +6,7 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
 source "$base_dir/utils.sh"
 
 seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIES_NAME')
