@@ -88,7 +88,8 @@ function mdbook.chkAvailable() {
 
 function checkConf(){
   exit_ifMissConf=${EXIT_ON_MISSING_CONF:-true}
-  for conf in $@; do
+  shift
+  for conf in "$@"; do
     if [[ -z "${!conf}" ]]; then
       if $exit_ifMissConf; then
         warn "$conf is not set in the configuration."
