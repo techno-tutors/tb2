@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+#? Save a chapter (create pull request to draft branch)
+#? Usage: tb2 chapter save -c CHAPTERNAME -b BOOKNAME [-q]
+#?   or: tb2 chapter save BOOKNAME/CHAPTERNAME [-q]
+#? Opts:
+#?   -b         BOOKNAME
+#?   -c         CHAPTERNAME
+#?   -q         Quiet mode (non-interactive)
+#? config dependencies: GITHUB_OWNERNAME, TB2_OPERATION_BRANCH
+
+set -euo pipefail
+
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
+source "$base_dir/utils.sh"
+
+bookName=""
+chapterName=""
+exit_missConf=false
+
+# Handle positional argument format: BOOKNAME/CHAPTERNAME
+if [[ $# -ge 1 && "$1" == *"/"* && "$1" != -* ]]; then
+  IFS='/' read -r bookName chapterName <<< "$1"
+  shift
+fi
+
+# Handle option format: -b BOOKNAME -c CHAPTERNAME [-q]
+while getopts "b:c:q" opt; do
+  case $opt in
+    b)
+      bookName="$OPTARG"
+      ;;
+    c)
+      chapterName="$OPTARG"
+      ;;
+    q)
+      exit_missConf=true
+      ;;
+    \?)
+      warn "Unknown option: -$OPTARG"
+      exit 1
+      ;;
+    :)
+      warn "Option -$OPTARG requires an argument."
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
+  warn "Both -b BOOKNAME and -c CHAPTERNAME are required."
+  info "Exit."
+  exit 1
+fi
+
+name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
+branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
+
+log "Checking for config..."
+checkConf "$exit_missConf" "GITHUB_OWNERNAME" "TB2_OPERATION_BRANCH"
+mustVar "$exit_missConf" "name" "branch"
+log "done."
+
+chapterBranch="chapter/$chapterName"
+repoName=$(basename $(git rev-parse --show-toplevel))
+
+info "Saving chapter: $chapterName in book: $bookName"
+log "Creating pull request from '$chapterBranch' to '$branch'..."
+
+run "gh pr create --repo \"$name/$repoName\" --base \"$branch\" --head \"$chapterBranch\" --title \"Chapter: $chapterName\" --body \"Chapter '$chapterName' in book '$bookName'\""
+log "done."
+info "Chapter '$chapterName' saved successfully."
+exit 0
+

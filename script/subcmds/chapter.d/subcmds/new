@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+#? Create a new chapter
+#? Usage: tb2 chapter new -c CHAPTERNAME -b BOOKNAME [-q]
+#?   or: tb2 chapter new BOOKNAME/CHAPTERNAME [-q]
+#? Opts:
+#?   -b         BOOKNAME
+#?   -c         CHAPTERNAME
+#?   -q         Quiet mode (non-interactive)
+#? config dependencies: GITHUB_OWNERNAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
+
+set -euo pipefail
+
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
+source "$base_dir/utils.sh"
+
+bookName=""
+chapterName=""
+exit_missConf=false
+
+if [[ $# -ge 1 && "$1" == *"/"* && "$1" != -* ]]; then
+  IFS='/' read -r bookName chapterName <<< "$1"
+  shift
+fi
+
+while getopts "b:c:q" opt; do
+  case $opt in
+    b)
+      bookName="$OPTARG"
+      ;;
+    c)
+      chapterName="$OPTARG"
+      ;;
+    q)
+      exit_missConf=true
+      ;;
+    \?)
+      warn "Unknown option: -$OPTARG"
+      exit 1
+      ;;
+    :)
+      warn "Option -$OPTARG requires an argument."
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
+  warn "Both -b BOOKNAME and -c CHAPTERNAME are required."
+  info "Exit."
+  exit 1
+fi
+
+name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
+srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
+branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
+
+log "Checking for config..."
+checkConf "$exit_missConf" "GITHUB_OWNERNAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
+mustVar "$exit_missConf" "name" "srcDir" "branch"
+log "done."
+
+chapterBranch="chapter/$chapterName"
+
+info "Creating new chapter: $chapterName in book: $bookName"
+
+log "Checking if book directory exists..."
+if [[ ! -d "$srcDir/$bookName" ]]; then
+  error "Book directory '$srcDir/$bookName' does not exist."
+  info "Exit."
+  exit 1
+fi
+log "done."
+
+log "Using branch: $branch"
+log "Checking if chapter branch already exists..."
+chapterBranchExists=false
+if git branch --list "$chapterBranch" >/dev/null 2>&1; then
+  chapterBranchExists=true
+  warn "Branch '$chapterBranch' already exists."
+else
+  log "Creating chapter branch from '$branch'..."
+  log "Checking if we're on branch '$branch'..."
+  if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null||echo)" != "$branch" ]]; then
+    log "Switching to branch '$branch'..."
+    run "git switch $branch"
+    log "done."
+  fi
+  log "Creating and switching to branch '$chapterBranch'..."
+  run "git switch -c $chapterBranch"
+  log "done."
+fi
+
+log "Checking for local directory..."
+chapterDir="$srcDir/$bookName/$chapterName"
+if [[ -d "$chapterDir" ]]; then
+  warn "Directory '$chapterDir' already exists locally. Skipping mkdir."
+else
+  log "Creating local directory '$chapterDir'..."
+  run "mkdir -p \"$chapterDir\""
+  log "done."
+fi
+
+log "Creating GitHub issue for chapter..."
+repoName=$(basename $(git rev-parse --show-toplevel))
+run "gh issue create --repo \"$name/$repoName\" --title \"Chapter: $chapterName\" --body \"Chapter '$chapterName' in book '$bookName'\" || true"
+log "done."
+
+ans=$(ask "Do you want to commit&push the repository now chapter branch? (y/n)")
+if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
+  info "Exit."
+  exit 0
+fi
+
+log "Committing and pushing changes..."
+run "git add \"$chapterDir\""
+run "git commit -m \"Create chapter $chapterName\" || true"
+run "git push -u origin $chapterBranch"
+log "done."
+info "New chapter '$chapterName' created successfully."
+exit 0
+

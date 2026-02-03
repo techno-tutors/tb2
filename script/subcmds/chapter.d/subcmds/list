@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+#? List chapters in a book
+#? Usage: tb2 chapter list -b BOOKNAME
+#?   or: tb2 chapter list BOOKNAME
+#? Opts:
+#?   -b         BOOKNAME
+#? config dependencies: MDBOOK_SRC_DIR
+
+set -euo pipefail
+
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
+source "$base_dir/utils.sh"
+
+bookName=""
+
+# Handle positional argument format: BOOKNAME
+if [[ $# -ge 1 && "$1" != -* ]]; then
+  bookName="$1"
+  shift
+fi
+
+# Handle option format: -b BOOKNAME
+while getopts "b:" opt; do
+  case $opt in
+    b)
+      bookName="$OPTARG"
+      ;;
+    \?)
+      warn "Unknown option: -$OPTARG"
+      exit 1
+      ;;
+    :)
+      warn "Option -$OPTARG requires an argument."
+      exit 1
+      ;;
+  esac
+done
+
+srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
+
+log "Checking for config..."
+checkConf true "MDBOOK_SRC_DIR"
+mustVar true "srcDir"
+log "done."
+
+bookDir="$srcDir/$bookName"
+
+info "=Local [mdBook directory chapters in $bookName]="
+log "=========================================="
+
+if [[ ! -d "$bookDir" ]]; then
+  warn "Book directory '$bookDir' does not exist."
+  info "No chapters found."
+else
+  log "Listing directories in '$bookDir'..."
+  if ls -d "$bookDir"/*/ >/dev/null 2>&1; then
+    ls -d "$bookDir"*/ | xargs -n1 basename
+  else
+    info "No chapters found in '$bookName'."
+  fi
+fi
+log "=========================================="
+exit 0
+
