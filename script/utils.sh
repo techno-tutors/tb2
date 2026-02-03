@@ -85,3 +85,35 @@ function mdbook.chkAvailable() {
   fi
   return 0
 }
+
+function checkConf(){
+  exit_ifMissConf=${EXIT_ON_MISSING_CONF:-true}
+  for conf in $@; do
+    if [[ -z "${!conf}" ]]; then
+      if $exit_ifMissConf; then
+        warn "$conf is not set in the configuration."
+        info "Exit."
+        exit 1
+      else
+        warn "$conf is not set in the configuration."
+        log "Please set it using 'tb2 config set $conf your_value'"
+        ans=$(ask "Do you want to set it to continue now [y] or exit[n]? (y/n)")
+        if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
+          value=$(ask "What's your \"$conf\" value?")
+          run "$base_dir/tb2 config set $conf \"$value\""
+          log "Checking..."
+          value=$("$base_dir/tb2" config get "$conf")
+          if [[ -z "$value" ]]; then
+            error "Failed to set $conf."
+            warn "Exit."
+            exit 1
+          fi
+          "$conf"="$value"
+          log "done."
+        else
+          info "Exit."
+          exit 1
+        fi
+    fi
+  done
+}
