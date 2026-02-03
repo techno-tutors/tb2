@@ -2,9 +2,8 @@
 #? Create a new book project
 #? Usage: tb2 book new -b BOOKNAME
 #? Opts:
-#?   -b           BOOKNAME
-#?   -e           exit if config variables are missing.
-#?   -c[default]  continue even if config variables are missing, prompting for input when necessary.
+#?   -b         BOOKNAME
+#?   -q         exit if config variables are missing.
 #? config dependencies: MDBOOK_SERIESNAME, GITHUB_OWNERNAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 set -euo pipefail
 
@@ -12,16 +11,13 @@ base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
 source "$base_dir/utils.sh"
 
 bookname=""
-while getopts "b:ec" opt; do
+while getopts "b:q" opt; do
   case $opt in
     b)
       bookname="$OPTARG"
       ;;
-    e)
+    q)
       exit_missConf=true
-      ;;
-    c)
-      exit_missConf=false
       ;;
     *)
       warn "Invalid option: -$OPTARG"
