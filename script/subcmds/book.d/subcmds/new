@@ -1,92 +1,70 @@
 #!/usr/bin/env bash
-
+#? Create a new book project
+#? Usage: tb2 book new -b BOOKNAME
+#? Opts:
+#?   -b           BOOKNAME
+#?   -e           exit if config variables are missing.
+#?   -c[default]  continue even if config variables are missing, prompting for input when necessary.
+#? config dependencies: MDBOOK_SERIESNAME, GITHUB_OWNERNAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 set -euo pipefail
 
 base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
 source "$base_dir/utils.sh"
 
 bookname=""
-case "${1:-}" in
-  "")
-    warn "No subcmd provided for 'book'"
-    exit 1
-    ;;
-  "-b")
-    bookname="${2:-}"
-    ;;
-  *)
-    bookname="$1"
-    ;;
-esac
-if [[ -z "$bookname" ]]; then
-  warn "Book name not provided. Use -b BOOKNAME to specify."
-  exit 1
-fi
-info "Creating new book GitHub Project: $bookname"
-seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIESNAME')
-name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
-if [[ -z "$seriesName" ]]; then
-  warn "MDBOOK_SERIESNAME is not set in the configuration."
-  log "Please set it using 'tb2 config --set MDBOOK_SERIESNAME your_series_name'"
+while getopts "b:ec" opt; do
+  case $opt in
+    b)
+      bookname="$OPTARG"
+      ;;
+    e)
+      exit_missConf=true
+      ;;
+    c)
+      exit_missConf=false
+      ;;
+    *)
+      warn "Invalid option: -$OPTARG"
+      exit 1
+      ;;
+  esac
+done
+if [[ -z "${bookname}" ]]; then
+  warn "Book name via -b opt is required."
   info "Exit."
   exit 1
 fi
-if [[ -z "$name" ]]; then
-  warn "GITHUB_OWNERNAME is not set in the configuration."
-  log "Please set it using 'tb2 config --set GITHUB_OWNERNAME your_github_username_or_organization_name'"
-  log "If you don't set it and continue, you'll select project owner in gh interactive command later."
-  log "You can select \'s\' to set it now by running tb2 config."
-  ans=$(ask "Do you want to continue without setting GITHUB_OWNERNAME? (y/n/s)")
-  if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
-    info "Exit."
-    exit 1
-  fi
-  if [[ "$ans" == "s" || "$ans" == "S" ]]; then
-    name=$(ask "What's your GITHUB OWNERNAME(user name or organization name)?")
-    run "$base_dir/tb2 config set GITHUB_OWNERNAME \'$name\'"
-    log "Checking..."
-    name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
-    if [[ -z "$name" ]]; then
-      error "Failed to set GITHUB_OWNERNAME."
-      warn "Exit."
-      exit 1
-    fi
-    log "done."
-  fi
-fi
 
-if [[ -n "$name" ]]; then
-  run "gh project create --owner \"$name\" --public --title \"$seriesName-$bookname\" --description \"Book project '$bookname'\""
-else
-  run "script -q -c 'gh project create --public --title \"$seriesName-$bookname\" --description \"Book project '$bookname'\"'"
-fi
+seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIESNAME')
+name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
+srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
+branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
+
+log "Checking for config..."
+checkConf true "MDBOOK_SERIESNAME" "GITHUB_OWNERNAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
+mustVar true "seriesName" "name" "srcDir" "branch"
+log "done."
+
+info "Creating new book GitHub Project: $bookname"
+run "gh project create --owner \"$name\" --public --title \"$seriesName-$bookname\" --description \"Book project '$bookname'\""
 log "Checking status of the project creation..."
-if [[ -z "$name" ]]; then
-  warn "No GITHUB_OWNERNAME set, please check the project creation status manually."
-  log "Skipping automatic verification for project created successfully."
-  log "done."
-else
-  run "gh project list --owner=\"$name\" | grep -q \"$seriesName-$bookname\" >/dev/null 2>&1"
-  if [[ $? -ne 0 ]]; then
-    error "Failed to create the project on GitHub."
-    exit 1
-  fi
-  log "done."
-  log "Project created on GitHub successfully."
+run "gh project list --owner=\"$name\" | grep -q \"$seriesName-$bookname\" >/dev/null 2>&1"
+if [[ $? -ne 0 ]]; then
+  error "Failed to create the project on GitHub."
+  exit 1
 fi
+log "done."
+log "Project created on GitHub successfully."
+
 log "Checking for local directory..."
-MDBOOK_SRC_DIR=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-if [[ -z "$MDBOOK_SRC_DIR" ]]; then
-  warn "MDBOOK_SRC_DIR is not set in the configuration. Using default 'src'."
-  MDBOOK_SRC_DIR="src"
-fi
-if [[ -d "$MDBOOK_SRC_DIR/$bookname" ]]; then
-  warn "Directory '$MDBOOK_SRC_DIR/$bookname' already exists locally. Skipping mkdir."
+
+if [[ -d "$srcDir/$bookname" ]]; then
+  warn "Directory '$srcDir/$bookname' already exists locally. Skipping mkdir."
 else
-  log "Creating local directory '$MDBOOK_SRC_DIR/$bookname'..."
-  run "mkdir \"$MDBOOK_SRC_DIR/$bookname\""
-  ls "$MDBOOK_SRC_DIR/$bookname" >/dev/null 2>&1 || {
-    error "Failed to create or access local directory '$MDBOOK_SRC_DIR/$bookname'."
+  log "Creating local directory '$srcDir/$bookname'..."
+  run "mkdir \"$srcDir/$bookname\""
+  ls "$srcDir/$bookname" >/dev/null 2>&1 || {
+    error "Failed to create or access local directory '$srcDir/$bookname'."
     exit 1
   }
 fi
@@ -95,31 +73,6 @@ ans=$(ask "Do you want to commit&push the repository now draft branch? (y/n)")
 if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
   info "Exit."
   exit 0
-fi
-log "Checking for branch config..."
-branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
-if [[ -z "$branch" ]]; then
-  warn "TB2_OPERATION_BRANCH is not set in the configuration."
-  log "Please set it using 'tb2 config --set TB2_OPERATION_BRANCH your_branch_name'."
-  log "If you don't set it and continue, the default branch name 'draft' will be used."
-  log "You can select \'s\' to set it now by running tb2 config."
-  ans=$(ask "Do you want to continue without setting TB2_OPERATION_BRANCH? (y/n/s)")
-  if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
-    info "Exit."
-    exit 1
-  fi
-  if [[ "$ans" == "s" || "$ans" == "S" ]]; then
-    branch=$(ask "What's your TB2_OPERATION_BRANCH?")
-    run "$base_dir/tb2 config set TB2_OPERATION_BRANCH \'$branch\'"
-    log "Checking..."
-    branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
-    if [[ -z "$branch" ]]; then
-      error "Failed to set TB2_OPERATION_BRANCH."
-      warn "Exit."
-      exit 1
-    fi
-    log "done."
-  fi
 fi
 log "Using branch: $branch"
 log "Checking if exist of branch name..."
@@ -147,7 +100,7 @@ else
   log "done."
 fi
 
-run "git add \"$MDBOOK_SRC_DIR/$bookname\""
+run "git add \"$srcDir/$bookname\""
 run "git commit -m \"Initial commit for book $bookname\""
 run "git push -u origin $branch"
 log "done."
