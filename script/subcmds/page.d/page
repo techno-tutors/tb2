@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+#? Usage: tb2 page <subcmd> [options]
+#? Subcommands:
+#?   new       Create a new page
+#?   save      Save a page (commit and push)
+#?   list      List pages in a chapter
+
+set -euo pipefail
+
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
+source "$base_dir/utils.sh"
+
+case "${1:-}" in
+  "")
+    warn "No subcmd provided for 'page'"
+    exit 1
+    ;;
+  "new")
+    shift
+    "$base_dir/subcmds/page.d/subcmds/new" "$@"
+    ;;
+  "save")
+    shift
+    "$base_dir/subcmds/page.d/subcmds/save" "$@"
+    ;;
+  "list")
+    shift
+    "$base_dir/subcmds/page.d/subcmds/list" "$@"
+    ;;
+  *)
+    warn "Unknown subcmd '$1' for 'page'"
+    exit 1
+    ;;
+esac

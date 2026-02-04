@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+#? List pages in a chapter
+#? Usage: tb2 page list -c CHAPTERNAME -b BOOKNAME
+#?   or: tb2 page list BOOKNAME/CHAPTERNAME
+#? Opts:
+#?   -b         BOOKNAME
+#?   -c         CHAPTERNAME
+#? config dependencies: MDBOOK_SRC_DIR
+
+set -euo pipefail
+
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
+source "$base_dir/utils.sh"
+
+bookName=""
+chapterName=""
+
+# Handle positional argument format: BOOKNAME/CHAPTERNAME
+if [[ $# -ge 1 && "$1" == *"/"* && "$1" != -* ]]; then
+  IFS='/' read -r bookName chapterName <<< "$1"
+  shift
+fi
+
+# Handle option format: -b BOOKNAME -c CHAPTERNAME
+while getopts "b:c:" opt; do
+  case $opt in
+    b)
+      bookName="$OPTARG"
+      ;;
+    c)
+      chapterName="$OPTARG"
+      ;;
+    \?)
+      warn "Unknown option: -$OPTARG"
+      exit 1
+      ;;
+    :)
+      warn "Option -$OPTARG requires an argument."
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
+  warn "Both -b BOOKNAME and -c CHAPTERNAME are required."
+  info "Exit."
+  exit 1
+fi
+
+srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
+
+log "Checking for config..."
+checkConf true "MDBOOK_SRC_DIR"
+mustVar true "srcDir"
+log "done."
+
+chapterDir="$srcDir/$bookName/$chapterName"
+
+info "=Local [mdBook pages in $bookName/$chapterName]="
+log "=========================================="
+
+if [[ ! -d "$chapterDir" ]]; then
+  warn "Chapter directory '$chapterDir' does not exist."
+  exit 1
+fi
+
+run "ls -1 \"$chapterDir\"/*.md 2>/dev/null | sed 's|.*/||;s|\.md$||' || echo 'No pages found.'"
+log "=========================================="
+exit 0
