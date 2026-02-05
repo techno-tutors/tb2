@@ -4,7 +4,7 @@
 #? Opts:
 #?   -b         BOOKNAME
 #?   -q         exit if config variables are missing.
-#? config dependencies: MDBOOK_SERIESNAME, GITHUB_OWNERNAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
+#? config dependencies: MDBOOK_SERIES_NAME, GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 set -euo pipefail
 
 base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
@@ -36,9 +36,9 @@ if [[ -z "${bookName}" ]]; then
 fi
 
 log "Checking for config..."
-checkConf true "MDBOOK_SERIESNAME" "GITHUB_OWNERNAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
-seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIESNAME')
-name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
+checkConf true "MDBOOK_SERIES_NAME" "GH_OWNER_NAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
+seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIES_NAME')
+name=$("$base_dir/tb2" config get 'GH_OWNER_NAME')
 srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
 branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
 mustVar true "seriesName" "name" "srcDir" "branch"

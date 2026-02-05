@@ -53,7 +53,7 @@ if [[ ! -d "$bookDir" ]]; then
   info "No chapters found."
 else
   log "Listing directories in '$bookDir'..."
-  if ls -d "$bookDir"/*/ >/dev/null 2>&1; then
+  if ls -d "$bookDir"/* >/dev/null 2>&1; then
     ls -d "$bookDir"*/ | xargs -n1 basename
   else
     info "No chapters found in '$bookName'."

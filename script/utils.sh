@@ -44,7 +44,7 @@ function checkConf(){
   exit_ifMissConf=${1:-EXIT_ON_MISSING_CONF:-true}
   shift
   for conf in "$@"; do
-    if $("$base_dir/tb2" config get "$conf" >/dev/null 2>&1); then
+    if [[ $("$base_dir/tb2" config get "$conf" >/dev/null 2>&1) != 0 ]]; then
       if $exit_ifMissConf; then
         warn "$conf is not set in the configuration."
         info "Exit."
@@ -73,14 +73,15 @@ function checkConf(){
   done
 }
 function mustVar(){
-  exit_ifMissConf=${$1:-true}
+  exit_ifMissConf=${1:-true}
   shift
   for conf in "$@"; do
     if [[ -z "${!conf}" ]]; then
+      warn "$conf is not set in the configuration."
       if $exit_ifMissConf; then
-        warn "$conf is not set in the configuration."
         info "Exit."
         exit 1
+      fi
     fi
   done
 }
