@@ -52,11 +52,10 @@ if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
   exit 1
 fi
 
-name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
-branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
-
 log "Checking for config..."
 checkConf "$exit_missConf" "GITHUB_OWNERNAME" "TB2_OPERATION_BRANCH"
+name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
+branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
 mustVar "$exit_missConf" "name" "branch"
 log "done."
 

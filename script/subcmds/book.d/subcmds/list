@@ -8,12 +8,12 @@ set -euo pipefail
 base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
 source "$base_dir/utils.sh"
 
-seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIES_NAME')
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-name=$("$base_dir/tb2" config get 'GH_OWNER_NAME')
 
 log "Checking for config..."
 checkConf true "MDBOOK_SERIES_NAME" "MDBOOK_SRC_DIR" "GH_OWNER_NAME"
+seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIES_NAME')
+srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
+name=$("$base_dir/tb2" config get 'GH_OWNER_NAME')
 mustVar true "seriesName" "srcDir" "name"
 log "done."
 

@@ -47,10 +47,10 @@ if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
   exit 1
 fi
 
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
 
 log "Checking for config..."
 checkConf true "MDBOOK_SRC_DIR"
+srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
 mustVar true "srcDir"
 log "done."
 

@@ -35,13 +35,12 @@ if [[ -z "${bookName}" ]]; then
   exit 1
 fi
 
+log "Checking for config..."
+checkConf true "MDBOOK_SERIESNAME" "GITHUB_OWNERNAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
 seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIESNAME')
 name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
 srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
 branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
-
-log "Checking for config..."
-checkConf true "MDBOOK_SERIESNAME" "GITHUB_OWNERNAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
 mustVar true "seriesName" "name" "srcDir" "branch"
 log "done."
 

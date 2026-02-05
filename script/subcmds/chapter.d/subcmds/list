@@ -36,10 +36,10 @@ while getopts "b:" opt; do
   esac
 done
 
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
 
 log "Checking for config..."
 checkConf true "MDBOOK_SRC_DIR"
+srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
 mustVar true "srcDir"
 log "done."
 

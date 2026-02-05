@@ -40,51 +40,6 @@ function run(){
   catch $?
   return $?
 }
-function gh.chkAvailable() {
-  # Check if gh is installed
-  info "Checking GitHub CLI availability..."
-  if ! command -v gh >/dev/null 2>&1; then
-    warn "GitHub CLI (gh) is not installed. Please install it from https://cli.github.com/ or your package manager.\n"
-    return 1
-  fi
-  # Check if user is logged in
-  info "Checking GitHub CLI user auth status..."
-  if ! gh auth status >/dev/null 2>&1; then
-    warn "You are not logged in to GitHub CLI. Please run 'gh auth login' first.\n"
-    return 1
-  fi
-  return 0
-}
-function mdbook.chkAvailable() {
-  # Check if mdbook is installed
-  info "Checking mdBook availability..."
-  if ! command -v mdbook >/dev/null 2>&1; then
-    warn "mdBook is not installed. Please install it from https://github.com/rust-lang/mdBook or your package manager.\n"
-    return 1
-  fi
-  # Check if we are in an mdBook project directory
-  info "Checking if current directory is an mdBook project..."
-  if [[ ! -f book.toml ]]; then
-    warn "This directory is not root of mdBook project. Please run this command in the root directory of your mdBook project.\n"
-    return 1
-  fi
-  # Check src directory exists
-  info "Checking mdBook 'src' directory existence..."
-  info "Lookig for default source directory config"
-  srcdir=""
-  run "srcdir=$base_dir/tb2" config --get 'MDBOOK_SRCDIR' >/dev/null 2>&1
-  if [[ -z "$srcdir" ]]; then
-    info "No custom source directory configured. Using default 'src'."
-    srcdir="src"
-  else
-    info "Using configured source directory: '$srcdir'"
-  fi
-  if [[ ! -d "$srcdir" ]]; then
-    warn "mdBook '$srcdir' directory not found. Please ensure you are in a valid mdBook project directory.\n"
-    return 1
-  fi
-  return 0
-}
 function checkConf(){
   exit_ifMissConf=${1:-EXIT_ON_MISSING_CONF:-true}
   shift
@@ -128,4 +83,51 @@ function mustVar(){
         exit 1
     fi
   done
+}
+function gh.chkAvailable() {
+  # Check if gh is installed
+  info "Checking GitHub CLI availability..."
+  if ! command -v gh >/dev/null 2>&1; then
+    warn "GitHub CLI (gh) is not installed. Please install it from https://cli.github.com/ or your package manager.\n"
+    return 1
+  fi
+  # Check if user is logged in
+  info "Checking GitHub CLI user auth status..."
+  if ! gh auth status >/dev/null 2>&1; then
+    warn "You are not logged in to GitHub CLI. Please run 'gh auth login' first.\n"
+    return 1
+  fi
+  return 0
+}
+function mdbook.chkAvailable() {
+  # Check if mdbook is installed
+  info "Checking mdBook availability..."
+  if ! command -v mdbook >/dev/null 2>&1; then
+    warn "mdBook is not installed. Please install it from https://github.com/rust-lang/mdBook or your package manager.\n"
+    return 1
+  fi
+  # Check if we are in an mdBook project directory
+  info "Checking if current directory is an mdBook project..."
+  log "checking for book.toml file..."
+  if [[ ! -f book.toml ]]; then
+    warn "This directory is not root of mdBook project. Please run this command in the root directory of your mdBook project.\n"
+    return 1
+  fi
+  # Check src directory exists
+  info "Checking mdBook 'src' directory existence..."
+  info "Lookig for default source directory config"
+  checkConf true MDBOOK_SRCDIR
+  srcdir=$("$base_dir/tb2" config get MDBOOK_SRCDIR)
+  if [[ -z "$srcdir" ]]; then
+    info "No custom source directory configured. Using default 'src'."
+    srcdir="src"
+  else
+    info "Using configured source directory: '$srcdir'"
+  fi
+  if [[ ! -d "$srcdir" ]]; then
+    warn "mdBook '$srcdir' directory not found. Please ensure you are in a valid mdBook project directory.\n"
+    return 1
+  fi
+  info "mdBook project directory confirmed."
+  return 0
 }
