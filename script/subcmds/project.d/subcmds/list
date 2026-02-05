@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+#? List all projects with books, chapters, and optionally pages
+#? Usage: tb2 project list [-p]
+#? Opts:
+#?   -p  Also list pages in each chapter
+#? config dependencies: MDBOOK_SRC_DIR
+
+set -euo pipefail
+
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
+source "$base_dir/utils.sh"
+
+show_pages=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -p)
+      show_pages=true
+      shift
+      ;;
+    *)
+      warn "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+log "Checking for config..."
+checkConf true "MDBOOK_SRC_DIR"
+srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
+mustVar true "srcDir"
+log "done."
+
+info "=All Projects: Books, Chapters & Pages="
+log "========================================"
+
+if [[ ! -d "$srcDir" ]]; then
+  warn "Source directory '$srcDir' does not exist."
+  info "No books found."
+  exit 0
+fi
+
+if ls -d "$srcDir"/*/ >/dev/null 2>&1; then
+  ls -d "$srcDir"/*/ | while read -r bookPath; do
+    bookName=$(basename "$bookPath")
+    info "[bok]$bookName"
+
+    if ls -d "$bookPath"/*/ >/dev/null 2>&1; then
+      ls -d "$bookPath"/*/ | while read -r chapterPath; do
+        chapterName=$(basename "$chapterPath")
+        log "  [chap]$chapterName"
+        if [[ "$show_pages" == true ]]; then
+          if ls "$chapterPath"/*.md >/dev/null 2>&1; then
+            ls "$chapterPath"/*.md | while read -r pagePath; do
+              pageName=$(basename "$pagePath" .md)
+              log "    [pag]$pageName"
+            done
+          fi
+        fi
+      done
+    else
+      log "  (no chapters)"
+    fi
+  done
+else
+  info "No books found in '$srcDir'."
+fi
+
+log "========================================"
+exit 0

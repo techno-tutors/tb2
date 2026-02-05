@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+#? Usage: tb2 project <subcmd> [options]
+#? Subcommands:
+#?   list      List all projects with books and chapters
+
+set -euo pipefail
+
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
+source "$base_dir/utils.sh"
+
+case "${1:-}" in
+  "")
+    warn "No subcmd provided for 'project'"
+    exit 1
+    ;;
+  "list")
+    shift
+    "$base_dir/subcmds/project.d/subcmds/list" "$@"
+    ;;
+  *)
+    warn "Unknown subcmd '$1' for 'project'"
+    exit 1
+    ;;
+esac
