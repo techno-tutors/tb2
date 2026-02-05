@@ -6,7 +6,7 @@
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
 #?   -q         Quiet mode (non-interactive)
-#? config dependencies: GITHUB_OWNERNAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
+#? config dependencies: GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 
 set -euo pipefail
 
@@ -52,8 +52,8 @@ fi
 
 
 log "Checking for config..."
-checkConf "$exit_missConf" "GITHUB_OWNERNAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
-name=$("$base_dir/tb2" config get 'GITHUB_OWNERNAME')
+checkConf "$exit_missConf" "GH_OWNER_NAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
+name=$("$base_dir/tb2" config get 'GH_OWNER_NAME')
 srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
 branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
 mustVar "$exit_missConf" "name" "srcDir" "branch"
