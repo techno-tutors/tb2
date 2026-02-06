@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-   tags:
+    tags:
       - 'v*'
 
 jobs:
@@ -12,14 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install ShellCheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Install ShellCheck & shfmt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck shfmt
 
       - name: Run ShellCheck
-        run: shellcheck **/*.sh
-
-      - name: Install shfmt
-        run: sudo apt-get install -y shfmt
+        run: |
+          shellcheck $(find . -type f -name "*.sh")
 
       - name: Run shfmt (warnings only)
         continue-on-error: true
@@ -27,21 +27,21 @@ jobs:
           echo "Running shfmt warnings (non-blocking)"
           shfmt -i 2 -l .
 
-      - name: Run shfmt (strict indent check)
+      - name: Run shfmt (strict diff)
         run: shfmt -i 2 -d .
 
       - name: Check strict mode (set -euo pipefail)
         run: |
-          for f in $(find . -name "*.sh"); do
-            if ! grep -q "set -euo pipefail" "$f"; then
+          for f in $(find . -type f -name "*.sh"); do
+            if ! grep -Eq '^[^#]*set -euo pipefail' "$f"; then
               echo "Strict mode missing in $f"
               exit 1
             fi
           done
 
-      - name: Check shebang (#!/usr/bin/env bash)
+      - name: Check shebang
         run: |
-          for f in $(find . -name "*.sh"); do
+          for f in $(find . -type f -name "*.sh"); do
             first_line=$(head -n1 "$f")
             if [ "$first_line" != "#!/usr/bin/env bash" ]; then
               echo "Bad shebang in $f: $first_line"

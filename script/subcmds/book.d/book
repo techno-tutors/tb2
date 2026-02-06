@@ -7,24 +7,24 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../.."
 source "$base_dir/utils.sh"
 
 case "${1:-}" in
-  "")
-    warn "No subcmd provided for 'book'"
-    exit 1
-    ;;
-  "new")
-    shift
-    "$base_dir/subcmds/book.d/subcmds/new" "$@"
-    ;;
-  "list")
-    shift
-    "$base_dir/subcmds/book.d/subcmds/list" "$@"
-    ;;
-  *)
-    warn "Unknown subcmd '$1' for 'book'"
-    exit 1
-    ;;
+"")
+  warn "No subcmd provided for 'book'"
+  exit 1
+  ;;
+"new")
+  shift
+  "$base_dir/subcmds/book.d/subcmds/new" "$@"
+  ;;
+"list")
+  shift
+  "$base_dir/subcmds/book.d/subcmds/list" "$@"
+  ;;
+*)
+  warn "Unknown subcmd '$1' for 'book'"
+  exit 1
+  ;;
 esac

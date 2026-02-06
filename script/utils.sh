@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+
 ESC="\033["
 RESET="${ESC}0m"
 BOLD="${ESC}1m"
@@ -9,38 +11,38 @@ YELLOW="${ESC}33m"
 RED="${ESC}31m"
 GREEN="${ESC}32m"
 
-function log(){
+function log() {
   printf "%b" "[+] $1\n"
 }
-function info(){
+function info() {
   printf "%b" "${BLUE}${BOLD}[*]${RESET} $1 \n"
 }
-function warn(){
+function warn() {
   printf "%b" "${YELLOW}${BOLD}[!]${RESET} $1 \n"
 }
-function error(){
+function error() {
   printf "%b" "${RED}${BOLD}[-]${RESET} $1"
 }
-function ask(){
-  read -p "$(printf "%b" "${BOLD}${GREEN}[?]${RESET}$1\n\t${BOLD}${GREEN}>>${RESET}")" answer
+function ask() {
+  read -r -p "$(printf "%b" "${BOLD}${GREEN}[?]${RESET}$1\n\t${BOLD}${GREEN}>>${RESET}")" answer
   echo "$answer"
 }
-function catch(){
+function catch() {
   if [[ $1 -ne 0 ]]; then
     error "Command failed with exit code $1."
     return 2
-  else 
+  else
     info "Command executed successfully."
     return 0
   fi
 }
-function run(){
+function run() {
   info "Runnning> $*"
   "$@"
   catch $?
   return $?
 }
-function checkConf(){
+function checkConf() {
   exit_ifMissConf=${1:-true}
   shift
   for conf in "$@"; do
@@ -63,16 +65,17 @@ function checkConf(){
             warn "Exit."
             exit 1
           fi
-          "$conf"="$value"
+          printf -v "$conf" '%s' "$value"
           log "done."
         else
           info "Exit."
           exit 1
         fi
+      fi
     fi
   done
 }
-function mustVar(){
+function mustVar() {
   exit_ifMissConf=${1:-true}
   shift
   for conf in "$@"; do

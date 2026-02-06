@@ -27,11 +27,11 @@ case "${1:-}" in
     "$base_dir/subcmds/help.d/help"
     ;;
   *)
-    if [[ ! -f "$base_dir/subcmds/${1}.d/$1"]] || [[ ! -x "$base_dir/subcmds/${1}.d/$1" ]]; then
+    if [[ ! -f "$base_dir/subcmds/$1.d/$1"]] || [[ ! -x "$base_dir/subcmds/$1.d/$1" ]]; then
       warn "Unknown subcommand: $1"
       info "Run '$0 --help' for usage."
       exit 1
     fi
-    "$base_dir/subcmds/${1}.d/$1" "${@:2}"
+    "$base_dir/subcmds/$1.d/$1" "${@:2}"
     ;;
 esac

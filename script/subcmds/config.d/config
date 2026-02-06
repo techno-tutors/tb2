@@ -6,7 +6,6 @@
 #?   get KEY            Get a configuration value
 #? Keys:
 #?   GH_OWNER_NAME           GitHub owner/organization name
-#?   TB2_DIRECT_EDIT         Direct edit flag (true/false)
 #?   MDBOOK_SERIES_NAME      Default series name for books
 #?   MDBOOK_SRC_DIR          mdBook source directory
 #?   TB2_OPERATION_BRANCH    Branch name for operations
@@ -14,7 +13,7 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../.."
 source "$base_dir/utils.sh"
 
 CONFIG_FILE="$base_dir/subcmds/config.d/config.list"
@@ -29,89 +28,83 @@ source "$CONFIG_FILE"
 getConf() {
   local key="$1"
   case "$key" in
-    "GH_OWNER_NAME")
-      echo "$GH_OWNER_NAME"
-      ;;
-    "TB2_DIRECT_EDIT")
-      echo "$TB2_DIRECT_EDIT"
-      ;;
-    "MDBOOK_SERIES_NAME")
-      echo "$MDBOOK_SERIES_NAME"
-      ;;
-    "MDBOOK_SRC_DIR")
-      echo "$MDBOOK_SRC_DIR"
-      ;;
-    "TB2_OPERATION_BRANCH")
-      echo "$TB2_OPERATION_BRANCH"
-      ;;
-    "PROJECT_NAME")
-      echo "$PROJECT_NAME"
-      ;;
-    *)
-      warn "Unknown key: $key\n"
-      echo
-      return 1
-      ;;
+  "GH_OWNER_NAME")
+    echo "$GH_OWNER_NAME"
+    ;;
+  "MDBOOK_SERIES_NAME")
+    echo "$MDBOOK_SERIES_NAME"
+    ;;
+  "MDBOOK_SRC_DIR")
+    echo "$MDBOOK_SRC_DIR"
+    ;;
+  "TB2_OPERATION_BRANCH")
+    echo "$TB2_OPERATION_BRANCH"
+    ;;
+  "PROJECT_NAME")
+    echo "$PROJECT_NAME"
+    ;;
+  *)
+    warn "Unknown key: $key\n"
+    echo
+    return 1
+    ;;
   esac
 }
 setConf() {
   local key="$1"
   local value="$2"
-  
+
   if [[ ! -f "$CONFIG_FILE" ]]; then
     error "Config file not found: $CONFIG_FILE\n"
     echo
     exit 1
   fi
-  
+
   case "$key" in
-    "GH_OWNER_NAME")
-      sed -i.bak "s|^GH_OWNER_NAME=.*$|GH_OWNER_NAME=\"$value\"|" "$CONFIG_FILE"
-      ;;
-    "TB2_DIRECT_EDIT")
-      sed -i.bak "s|^TB2_DIRECT_EDIT=.*$|TB2_DIRECT_EDIT=$value|" "$CONFIG_FILE"
-      ;;
-    "MDBOOK_SERIES_NAME")
-      sed -i.bak "s|^MDBOOK_SERIES_NAME=.*$|MDBOOK_SERIES_NAME=\"$value\"|" "$CONFIG_FILE"
-      ;;
-    "MDBOOK_SRC_DIR")
-      sed -i.bak "s|^MDBOOK_SRC_DIR=.*$|MDBOOK_SRC_DIR=\"$value\"|" "$CONFIG_FILE"
-      ;;
-    "TB2_OPERATION_BRANCH")
-      sed -i.bak "s|^TB2_OPERATION_BRANCH=.*$|TB2_OPERATION_BRANCH=\"$value\"|" "$CONFIG_FILE"
-      ;;
-    "PROJECT_NAME")
-      sed -i.bak "s|^PROJECT_NAME=.*$|PROJECT_NAME=\"$value\"|" "$CONFIG_FILE"
-      ;;
-    *)
-      warn "Unknown key: $key\n"
-      echo
-      return 1
-      ;;
+  "GH_OWNER_NAME")
+    sed -i.bak "s|^GH_OWNER_NAME=.*$|GH_OWNER_NAME=\"$value\"|" "$CONFIG_FILE"
+    ;;
+  "MDBOOK_SERIES_NAME")
+    sed -i.bak "s|^MDBOOK_SERIES_NAME=.*$|MDBOOK_SERIES_NAME=\"$value\"|" "$CONFIG_FILE"
+    ;;
+  "MDBOOK_SRC_DIR")
+    sed -i.bak "s|^MDBOOK_SRC_DIR=.*$|MDBOOK_SRC_DIR=\"$value\"|" "$CONFIG_FILE"
+    ;;
+  "TB2_OPERATION_BRANCH")
+    sed -i.bak "s|^TB2_OPERATION_BRANCH=.*$|TB2_OPERATION_BRANCH=\"$value\"|" "$CONFIG_FILE"
+    ;;
+  "PROJECT_NAME")
+    sed -i.bak "s|^PROJECT_NAME=.*$|PROJECT_NAME=\"$value\"|" "$CONFIG_FILE"
+    ;;
+  *)
+    warn "Unknown key: $key\n"
+    echo
+    return 1
+    ;;
   esac
 }
 
 case "${1:-}" in
-    get)
-      if [[ $# -lt 2 ]]; then
-        error "Key required for 'get' subcommand\n"
-        echo
-        exit 1
-      fi
-      getConf "$2"
-      ;;
-    set)
-      if [[ $# -lt 3 ]]; then
-        error "Key and value required for 'set' subcommand\n"
-        echo
-        exit 1
-      fi
-      setConf "$2" "$3"
-      ;;
-    *)
-      error "Unknown subcommand: $subcmd\n"
-      echo
-      exit 1
-      ;;
-  esac
+get)
+  if [[ $# -lt 2 ]]; then
+    error "Key required for 'get' subcommand\n"
+    echo
+    exit 1
+  fi
+  getConf "$2"
+  ;;
+set)
+  if [[ $# -lt 3 ]]; then
+    error "Key and value required for 'set' subcommand\n"
+    echo
+    exit 1
+  fi
+  setConf "$2" "$3"
+  ;;
+*)
+  error "Unknown subcommand: $1\n"
+  echo
+  exit 1
+  ;;
+esac
 exit 0

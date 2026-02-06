@@ -7,27 +7,27 @@
 #? config dependencies: MDBOOK_SERIES_NAME, GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH, PROJECT_NAME
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
 source "$base_dir/utils.sh"
 
 bookName=""
 exit_missConf=false
 while getopts "b:q" opt; do
   case $opt in
-    b)
-      bookName="$OPTARG"
-      ;;
-    q)
-      exit_missConf=true
-      ;;
-    \?)
-      warn "Unknown option: -$OPTARG"
-      exit 1
-      ;;
-    :)
-      warn "Option -$OPTARG requires an argument."
-      exit 1
-      ;;
+  b)
+    bookName="$OPTARG"
+    ;;
+  q)
+    exit_missConf=true
+    ;;
+  \?)
+    warn "Unknown option: -$OPTARG"
+    exit 1
+    ;;
+  :)
+    warn "Option -$OPTARG requires an argument."
+    exit 1
+    ;;
   esac
 done
 if [[ -z "${bookName}" ]]; then
@@ -71,7 +71,7 @@ if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
 fi
 log "Using branch: $branch"
 log "Checking if exist of branch name..."
-if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null||echo)" != "$branch" ]]; then
+if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo)" != "$branch" ]]; then
   log "Branch '$branch' is not current branch."
   log "Checking for branch existence..."
   if git branch --list "$branch" >/dev/null 2>&1; then

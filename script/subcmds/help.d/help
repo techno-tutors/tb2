@@ -3,22 +3,22 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../.."
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../.."
 subcmd_dir="$base_dir/subcmds"
 
 source "$base_dir/utils.sh"
 
 info "tb2 - TextBook ToolBox"
-log  "GitHub automation & textbook builder CLI"
+log "GitHub automation & textbook builder CLI"
 echo
 
 info "USAGE"
-log  "  tb2 <subcmd> [options]"
+log "  tb2 <subcmd> [options]"
 echo
 
 info "DESCRIPTION"
-log  "  tb2 automates GitHub operations for textbook creation."
-log  "  It manages Books, Chapters, Pages, Issues, Branches, and Projects."
+log "  tb2 automates GitHub operations for textbook creation."
+log "  It manages Books, Chapters, Pages, Issues, Branches, and Projects."
 echo
 
 info "SUBCOMMANDS"
@@ -34,12 +34,11 @@ for dir in "$subcmd_dir"/*.d; do
   printf "  %-10s\n%s\n" "$name" "$desc"
 done
 
-
 echo
 
 info "FLAGS"
-log  "  -h, --help        Show help for a specific subcommand"
-log  "  -i                Start tb2 in interactive mode"
+log "  -h, --help        Show help for a specific subcommand"
+log "  -i                Start tb2 in interactive mode"
 echo
 
 info "EXAMPLES"

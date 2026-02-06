@@ -7,21 +7,21 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
 source "$base_dir/utils.sh"
 
 show_pages=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -p)
-      show_pages=true
-      shift
-      ;;
-    *)
-      warn "Unknown option: $1"
-      exit 1
-      ;;
+  -p)
+    show_pages=true
+    shift
+    ;;
+  *)
+    warn "Unknown option: $1"
+    exit 1
+    ;;
   esac
 done
 

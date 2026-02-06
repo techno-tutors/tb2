@@ -7,27 +7,26 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
 source "$base_dir/utils.sh"
 
 bookName=""
 
 while getopts "b:" opt; do
   case $opt in
-    b)
-      bookName="$OPTARG"
-      ;;
-    \?)
-      warn "Unknown option: -$OPTARG"
-      exit 1
-      ;;
-    :)
-      warn "Option -$OPTARG requires an argument."
-      exit 1
-      ;;
+  b)
+    bookName="$OPTARG"
+    ;;
+  \?)
+    warn "Unknown option: -$OPTARG"
+    exit 1
+    ;;
+  :)
+    warn "Option -$OPTARG requires an argument."
+    exit 1
+    ;;
   esac
 done
-
 
 log "Checking for config..."
 checkConf true "MDBOOK_SRC_DIR"
@@ -46,11 +45,10 @@ if [[ ! -d "$bookDir" ]]; then
 else
   log "Listing directories in '$bookDir'..."
   if ls -d "$bookDir"/* >/dev/null 2>&1; then
-    ls -d "$bookDir"*/ | xargs -n1 basename
+    ls -d "$bookDir"/* | xargs -n1 basename
   else
     info "No chapters found in '$bookName'."
   fi
 fi
 log "=========================================="
 exit 0
-

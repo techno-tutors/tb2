@@ -10,7 +10,7 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
+base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
 source "$base_dir/utils.sh"
 
 bookName=""
@@ -20,26 +20,26 @@ exit_missConf=false
 
 while getopts "b:c:p:q" opt; do
   case $opt in
-    b)
-      bookName="$OPTARG"
-      ;;
-    c)
-      chapterName="$OPTARG"
-      ;;
-    p)
-      pageName="$OPTARG"
-      ;;
-    q)
-      exit_missConf=true
-      ;;
-    \?)
-      warn "Unknown option: -$OPTARG"
-      exit 1
-      ;;
-    :)
-      warn "Option -$OPTARG requires an argument."
-      exit 1
-      ;;
+  b)
+    bookName="$OPTARG"
+    ;;
+  c)
+    chapterName="$OPTARG"
+    ;;
+  p)
+    pageName="$OPTARG"
+    ;;
+  q)
+    exit_missConf=true
+    ;;
+  \?)
+    warn "Unknown option: -$OPTARG"
+    exit 1
+    ;;
+  :)
+    warn "Option -$OPTARG requires an argument."
+    exit 1
+    ;;
   esac
 done
 
@@ -48,7 +48,6 @@ if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]] || [[ -z "${pageName}" ]]
   info "Exit."
   exit 1
 fi
-
 
 log "Checking for config..."
 checkConf "$exit_missConf" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
