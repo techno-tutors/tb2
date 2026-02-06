@@ -4,13 +4,14 @@
 #? Opts:
 #?   -b         BOOKNAME
 #?   -q         exit if config variables are missing.
-#? config dependencies: MDBOOK_SERIES_NAME, GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
+#? config dependencies: MDBOOK_SERIES_NAME, GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH, PROJECT_NAME
 set -euo pipefail
 
 base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)/../../.."
 source "$base_dir/utils.sh"
 
 bookName=""
+exit_missConf=false
 while getopts "b:q" opt; do
   case $opt in
     b)
@@ -36,24 +37,19 @@ if [[ -z "${bookName}" ]]; then
 fi
 
 log "Checking for config..."
-checkConf true "MDBOOK_SERIES_NAME" "GH_OWNER_NAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
+checkConf "$exit_missConf" "MDBOOK_SERIES_NAME" "GH_OWNER_NAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH" "PROJECT_NAME"
 seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIES_NAME')
 name=$("$base_dir/tb2" config get 'GH_OWNER_NAME')
 srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
 branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
-mustVar true "seriesName" "name" "srcDir" "branch"
+projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
+mustVar "$exit_missConf" "seriesName" "name" "srcDir" "branch" "projectName"
 log "done."
 
-info "Creating new book GitHub Project: $bookName"
-run "gh project create --owner \"$name\" --public --title \"$seriesName-$bookName\" --description \"Book project '$bookName'\""
-log "Checking status of the project creation..."
-run "gh project list --owner=\"$name\" | grep -q \"$seriesName-$bookName\" >/dev/null 2>&1"
-if [[ $? -ne 0 ]]; then
-  error "Failed to create the project on GitHub."
-  exit 1
-fi
+info "Creating new book Issue: $bookName"
+run "gh issue create --repo \"$projectName\" --title \"Book: $bookName\" --body \"New book project '$bookName'\" || true"
 log "done."
-log "Project created on GitHub successfully."
+log "Issue created on GitHub successfully."
 
 log "Checking for local directory..."
 

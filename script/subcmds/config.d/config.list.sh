@@ -16,3 +16,7 @@ MDBOOK_SRC_DIR=""
 # branch name for mdbook deployment by using tb2
 TB2_OPERATION_BRANCH=""
 
+# project name for GitHub Issue management (e.g., techno-tutors/textbook)
+# issues will be created in this repository
+PROJECT_NAME=""
+

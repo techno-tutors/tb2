@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #? List pages in a chapter
 #? Usage: tb2 page list -c CHAPTERNAME -b BOOKNAME
-#?   or: tb2 page list BOOKNAME/CHAPTERNAME
 #? Opts:
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
@@ -15,13 +14,6 @@ source "$base_dir/utils.sh"
 bookName=""
 chapterName=""
 
-# Handle positional argument format: BOOKNAME/CHAPTERNAME
-if [[ $# -ge 1 && "$1" == *"/"* && "$1" != -* ]]; then
-  IFS='/' read -r bookName chapterName <<< "$1"
-  shift
-fi
-
-# Handle option format: -b BOOKNAME -c CHAPTERNAME
 while getopts "b:c:" opt; do
   case $opt in
     b)

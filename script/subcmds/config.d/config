@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-#? Write your subcommand description here
-#? You can write mulitple lines of description.
+#? Configuration management for tb2
 #? Usage: tb2 config <subcmd> [options]
 #? Subcommands:
 #?   set KEY VALUE      Set a configuration value
 #?   get KEY            Get a configuration value
-#? Opts:
 #? Keys:
-#?   directedit
-#?   orgname
-#?   usrname
+#?   GH_OWNER_NAME           GitHub owner/organization name
+#?   TB2_DIRECT_EDIT         Direct edit flag (true/false)
+#?   MDBOOK_SERIES_NAME      Default series name for books
+#?   MDBOOK_SRC_DIR          mdBook source directory
+#?   TB2_OPERATION_BRANCH    Branch name for operations
+#?   PROJECT_NAME            GitHub repository for Issue management (owner/repo)
 
 set -euo pipefail
 
@@ -43,6 +44,9 @@ getConf() {
     "TB2_OPERATION_BRANCH")
       echo "$TB2_OPERATION_BRANCH"
       ;;
+    "PROJECT_NAME")
+      echo "$PROJECT_NAME"
+      ;;
     *)
       warn "Unknown key: $key\n"
       echo
@@ -75,6 +79,9 @@ setConf() {
       ;;
     "TB2_OPERATION_BRANCH")
       sed -i.bak "s|^TB2_OPERATION_BRANCH=.*$|TB2_OPERATION_BRANCH=\"$value\"|" "$CONFIG_FILE"
+      ;;
+    "PROJECT_NAME")
+      sed -i.bak "s|^PROJECT_NAME=.*$|PROJECT_NAME=\"$value\"|" "$CONFIG_FILE"
       ;;
     *)
       warn "Unknown key: $key\n"

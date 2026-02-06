@@ -41,10 +41,10 @@ function run(){
   return $?
 }
 function checkConf(){
-  exit_ifMissConf=${1:-EXIT_ON_MISSING_CONF:-true}
+  exit_ifMissConf=${1:-true}
   shift
   for conf in "$@"; do
-    if [[ $("$base_dir/tb2" config get "$conf" >/dev/null 2>&1) != 0 ]]; then
+    if ! "$base_dir/tb2" config get "$conf" >/dev/null 2>&1; then
       if $exit_ifMissConf; then
         warn "$conf is not set in the configuration."
         info "Exit."
@@ -53,7 +53,7 @@ function checkConf(){
         warn "$conf is not set in the configuration."
         log "Please set it using 'tb2 config set $conf your_value'"
         ans=$(ask "Do you want to set it to continue now [y] or exit[n]? (y/n)")
-        if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
+        if [[ "$ans" == "y" || "$ans" == "Y" ]]; then
           value=$(ask "What's your \"$conf\" value?")
           run "$base_dir/tb2 config set $conf \"$value\""
           log "Checking..."

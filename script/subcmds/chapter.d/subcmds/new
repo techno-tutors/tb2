@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 #? Create a new chapter
 #? Usage: tb2 chapter new -c CHAPTERNAME -b BOOKNAME [-q]
-#?   or: tb2 chapter new BOOKNAME/CHAPTERNAME [-q]
 #? Opts:
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
 #?   -q         Quiet mode (non-interactive)
-#? config dependencies: GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
+#? config dependencies: GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH, PROJECT_NAME
 
 set -euo pipefail
 
@@ -16,11 +15,6 @@ source "$base_dir/utils.sh"
 bookName=""
 chapterName=""
 exit_missConf=false
-
-if [[ $# -ge 1 && "$1" == *"/"* && "$1" != -* ]]; then
-  IFS='/' read -r bookName chapterName <<< "$1"
-  shift
-fi
 
 while getopts "b:c:q" opt; do
   case $opt in
@@ -52,11 +46,12 @@ fi
 
 
 log "Checking for config..."
-checkConf "$exit_missConf" "GH_OWNER_NAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
+checkConf "$exit_missConf" "GH_OWNER_NAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH" "PROJECT_NAME"
 name=$("$base_dir/tb2" config get 'GH_OWNER_NAME')
 srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
 branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
-mustVar "$exit_missConf" "name" "srcDir" "branch"
+projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
+mustVar "$exit_missConf" "name" "srcDir" "branch" "projectName"
 log "done."
 
 chapterBranch="chapter/$chapterName"
@@ -70,6 +65,16 @@ if [[ ! -d "$srcDir/$bookName" ]]; then
   exit 1
 fi
 log "done."
+
+log "Searching for parent book Issue..."
+bookIssueNum=$(gh issue list --repo "$projectName" --search "title:\"Book: $bookName\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
+if [[ -z "$bookIssueNum" ]]; then
+  warn "Could not find Book Issue for '$bookName'. Continuing without link."
+  bookIssueBody="Chapter '$chapterName' in book '$bookName'"
+else
+  log "Found Book Issue #$bookIssueNum"
+  bookIssueBody="Chapter '$chapterName' in book '$bookName'. Parent Issue: #$bookIssueNum"
+fi
 
 log "Using branch: $branch"
 log "Checking if chapter branch already exists..."
@@ -101,8 +106,7 @@ else
 fi
 
 log "Creating GitHub issue for chapter..."
-repoName=$(basename $(git rev-parse --show-toplevel))
-run "gh issue create --repo \"$name/$repoName\" --title \"Chapter: $chapterName\" --body \"Chapter '$chapterName' in book '$bookName'\" || true"
+run "gh issue create --repo \"$projectName\" --title \"Chapter: $chapterName\" --body \"$bookIssueBody\" || true"
 log "done."
 
 ans=$(ask "Do you want to commit&push the repository now chapter branch? (y/n)")

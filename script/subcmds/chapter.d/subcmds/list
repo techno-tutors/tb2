@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #? List chapters in a book
 #? Usage: tb2 chapter list -b BOOKNAME
-#?   or: tb2 chapter list BOOKNAME
 #? Opts:
 #?   -b         BOOKNAME
 #? config dependencies: MDBOOK_SRC_DIR
@@ -13,13 +12,6 @@ source "$base_dir/utils.sh"
 
 bookName=""
 
-# Handle positional argument format: BOOKNAME
-if [[ $# -ge 1 && "$1" != -* ]]; then
-  bookName="$1"
-  shift
-fi
-
-# Handle option format: -b BOOKNAME
 while getopts "b:" opt; do
   case $opt in
     b)

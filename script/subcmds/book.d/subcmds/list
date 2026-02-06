@@ -10,18 +10,18 @@ source "$base_dir/utils.sh"
 
 
 log "Checking for config..."
-checkConf true "MDBOOK_SERIES_NAME" "MDBOOK_SRC_DIR" "GH_OWNER_NAME"
-seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIES_NAME')
+checkConf true "MDBOOK_SRC_DIR" "PROJECT_NAME"
 srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-name=$("$base_dir/tb2" config get 'GH_OWNER_NAME')
-mustVar true "seriesName" "srcDir" "name"
+projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
+mustVar true "srcDir" "projectName"
 log "done."
 
-info "=Remote [GitHub Projects]="
+info "=Remote [GitHub Issues]="
 log "=========================="
-run "gh project list --owner \"${name}\" | grep \"${seriesName}-\""
+run "gh issue list --repo \"$projectName\" --search \"title:Book:\" --state all"
 
-info "=Local [mdBook directory: ./${base_dir}/]="
-run "ls -d ./${srcDir:-src}/*/ | grep \"${seriesName}-\" || echo 'No local books found.'"
+info "=Local [mdBook directory]="
+log "=========================="
+run "ls -d ./${srcDir:-src}/*/ 2>/dev/null || echo 'No local books found.'"
 log "========================"
 exit 0

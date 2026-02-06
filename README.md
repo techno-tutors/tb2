@@ -1,12 +1,13 @@
 # tb2
 
-A simple toolbox bash script for main repositry Textbook.
-This contains GitHub automations, auto commit or auto issue for example.
-This has 2 mode, Interactive and basic commands.
+A simple toolbox bash script for textbook management using GitHub Issues.
+This automates the creation and management of educational content through the Issue hierarchy system.
+TB2 provides both interactive and command-line modes for efficient workflow.
 (TextBook ToolBox === TB2)
 
 ## About
 - *[Installation](#how-to-install)*
+- *[Configuration](#configuration)*
 - *[Usage](#usage)*
 - *[Example](#example)*
 - *[License](#license)*
@@ -32,104 +33,119 @@ curl -fsSL https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/i
 wget -qO- https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | sh
 ```
 
-## Usage
-<GitHubの動き>にはGitのみの動作も含まれます。
+## Configuration
+Before using tb2, you must configure the following settings:
+```sh
+# Set your GitHub username or organization name
+tb2 config set GH_OWNER_NAME "YOUR_GITHUB_USERNAME"
+# Set the mdBook series name (used as a prefix for organization)
+tb2 config set MDBOOK_SERIES_NAME "YOUR_SERIES_NAME"
+# Set the source directory for your mdBook content
+tb2 config set MDBOOK_SRC_DIR "src"
+# Set the branch name for operations (usually "draft")
+tb2 config set TB2_OPERATION_BRANCH "draft"
+# Set the GitHub repository for Issue management (REQUIRED)
+# This repository will contain the Issue hierarchy
+tb2 config set PROJECT_NAME "owner/repository"
+```
+The `PROJECT_NAME` is the most important configuration. All book, chapter, and page issues will be created in this repository.
 
----
+## Usage
+### Issue Hierarchy System
+TB2 uses GitHub Issues organized in a three-level hierarchy:
+- **Issue (Level 1)**: Book - Each book is represented as a top-level issue
+- **Sub-Issue (Level 2)**: Chapter - Each chapter is a child issue under a book issue
+- **Sub-Sub-Issue (Level 3)**: Page - Each page is a child issue under a chapter issue
 
 ### subcmd "book"
 ```sh
 tb2 book new -b BOOKNAME
-#または
-tb2 book new BOOKNAME
 ```
-新しい本NAMEを作成します。
+Create a new book project.
 
-#### GitHubの動き
-- GitHub ProjectへBOOKNAMEが追加されます。
+#### GitHub Operations
+- Creates a new Issue titled "Book: BOOKNAME" in the configured repository
+- Creates a local directory at `MDBOOK_SRC_DIR/BOOKNAME`
 
 ___
 
 ```sh
 tb2 book list
 ```
-本一覧を表示します。
+List all books.
 
 ___
 
 ### subcmd "chapter"
 ```sh
 tb2 chapter new -c CHAPTERNAME -b BOOKNAME
-#または
-tb2 chapter new BOOKNAME/CHAPTERNAME
 ```
-新しいチャプターNAMEを本BOOKNAMEに作成します。
+Create a new chapter within a book.
 
-#### GitHubの動き
-- チャプター用のブランチがdraftから切られます。
-- チャプター用のissueがProject(BOOKNAME)に立てられます。
+#### GitHub Operations
+- Creates a new Issue titled "Chapter: CHAPTERNAME" linked to the parent book issue
+- Creates a chapter branch (`chapter/CHAPTERNAME`) from the operation branch
+- Creates a local directory at `MDBOOK_SRC_DIR/BOOKNAME/CHAPTERNAME`
 
 ___
 
 ```sh
 tb2 chapter save -c CHAPTERNAME -b BOOKNAME
-#または
-tb2 chapter save BOOKNAME/CHAPTERNAME
 ```
-チャプターを保存します。
+Save chapter changes as a pull request.
 
-#### GitHubの動き
-- チャプター用のブランチをdraftブランチにプルリクエストします。
+#### GitHub Operations
+- Creates a pull request from the chapter branch to the operation branch
 
 ___
 
 ```sh
 tb2 chapter list -b BOOKNAME
-#または
-tb2 chapter list BOOKNAME
 ```
-本BOOKNAMEのチャプター一覧を表示します。
+List all chapters in a book.
 
 ___
 
 ### subcmd "page"
 ```sh
-tb2 page new -c CHAPTERNAME -b BOOKNAME [-p PAGENAME]
-#または
-tb2 page new BOOKNAME/CHAPTERNAME/PAGENAME
+tb2 page new -b BOOKNAME -c CHAPTERNAME [-p PAGENAME]
 ```
-テンプレートからMDを作成します。  
--pを指定しなかった場合、ページの名前は連番でpageNとなります。
+Create a new page within a chapter.
+If PAGENAME is omitted, pages are auto-numbered as p1, p2, etc.
 
-#### GitHubの動き
-- SubIssueが立てられます。
+#### GitHub Operations
+- Creates a new Issue titled "Page: PAGENAME (CHAPTERNAME)" linked to the parent chapter issue
+- Creates a markdown file at `MDBOOK_SRC_DIR/BOOKNAME/CHAPTERNAME/PAGENAME.md`
 
 ___
 
 ```sh
-tb2 page save -c CHAPTERNAME -b BOOKNAME -p PAGENAME
-#または
-tb2 page save CHAPTERNAME/BOOKNAME/PAGENAME
+tb2 page save -b BOOKNAME -c CHAPTERNAME -p PAGENAME
 ```
-ページを保存します。
+Save page changes by committing and pushing.
 
-#### GitHubの動き
-- コミット、及びその一連の流れをします。
+#### GitHub Operations
+- Commits and pushes the page changes to the repository
 
+___
+```sh
+tb2 page list -b BOOKNAME -c CHAPTERNAME
+```
+Display all pages in the chapter.
 ___
 
 ### subcmd "project"
 ```sh
 tb2 project list
 ```
-プロジェクト全体の本とチャプターを表示します。
+Display all books and chapters in the project.
 
 ___
 
 ```sh
 tb2 project list -p|-page
 ```
-プロジェクト全体の本,チャプター,及びそれに含まれるページも表示します。
+Display all books, chapters, and their contained pages.
 
 ___
 
@@ -137,55 +153,95 @@ ___
 ```sh
 tb2 [-i]
 ```
+Launch the interactive mode for guided workflow.
 
 ## Example
-TB2を使うと、教科書制作のGitHub作業やディレクトリいじり、テンプレの適用などが自動化されます。
-以下は、ツール直打ち（対話モードではない）で、本→チャプター→ページを作る一連の例です。
+TB2 automates the textbook creation workflow using GitHub Issues for management and Git for version control.
+Below is a complete example of creating a book, chapter, and page structure:
 
-### 1. **本を作る**
+### Setup
+First, configure TB2 with your repository information:
 ```sh
-tb2 book new Crypto
+tb2 config set PROJECT_NAME "techno-tutors/textbook"
+tb2 config set GH_OWNER_NAME "techno-tutors"
+tb2 config set MDBOOK_SERIES_NAME "MyTextbook"
+tb2 config set MDBOOK_SRC_DIR "src"
+tb2 config set TB2_OPERATION_BRANCH "draft"
 ```
-- GitHub Projectに`Crypto`が追加されます
--bで明示的にBOOKNAMEを指定してもいいけど略しても変わらん。
 
-### 2. **チャプターを作る**
+### 1. **Create a Book**
 ```sh
-tb2 chapter new Crypto/RSA
-#もしくは
+tb2 book new -b Crypto
+```
+- Creates a GitHub Issue titled "Book: Crypto" in the repository `techno-tutors/textbook`
+- Creates a local directory at `src/Crypto`
+
+### 2. **Create a Chapter**
+```sh
 tb2 chapter new -b Crypto -c RSA
 ```
-- `draft`ブランチから`chapter/RSA`ブランチが作成されます
-- "RSA"のIssueがProject(Crypto)に作成されます
+- Creates a GitHub Issue titled "Chapter: RSA" linked to the "Book: Crypto" issue
+- Creates a new branch `chapter/RSA` from the `draft` branch
+- Creates a local directory at `src/Crypto/RSA`
 
-### 3. **ページを書く**
+### 3. **Create Pages**
 ```sh
-tb2 page new Crypto/RSA/WhatIsRSA
+tb2 page new -b Crypto -c RSA -p WhatIsRSA
 ```
-ここで`-c`,`-b`,`-p`でわざわざ指定するのはめんどい。短縮形を使おう。
-- Sub-Issue が作成されます
-- `WhatIsRSA.md`が作成されます
+- Creates a GitHub Issue titled "Page: WhatIsRSA (RSA)" linked to the "Chapter: RSA" issue
+- Creates a markdown file at `src/Crypto/RSA/WhatIsRSA.md`
+- You can create multiple pages in the same chapter
 
-### 4. **編集**
-### 5. **ページを保存する**
+### 4. **Edit Your Content**
+Edit the markdown files in your text editor:
 ```sh
-tb2 page save Crypto/RSA/WhatIsRSA
+nano src/Crypto/RSA/WhatIsRSA.md
 ```
-- 変更がcommit&pushされます
 
-### 6. **チャプターを完成させる**
+### 5. **Save Page Changes**
 ```sh
-tb2 chapter save Crypto/RSA
+tb2 page save -b Crypto -c RSA -p WhatIsRSA
 ```
-- `chapter/RSA`ブランチから`draft`ブランチにPRがつくられます。
-- RSA chapterのissueはDONEやclosedにはなりません
+- Commits and pushes the page changes to the repository on the chapter branch
+- Not like "-p WhatIsRSA.md".
 
-### 7. **満足する**
+### 6. **Finalize the Chapter**
 ```sh
+tb2 chapter save -b Crypto -c RSA
+```
+- Creates a pull request from the `chapter/RSA` branch to the `draft` branch
+- The "Chapter: RSA" issue remains open for tracking
+
+### 7. **Review Your Progress**
+```sh
+tb2 project list
+#or with pages
 tb2 project list -page
 ```
-- 本 → チャプター → ページ の階層が一覧表示されます
-自分が成し遂げた成果を見渡そう。
+- Displays the complete hierarchy of books, chapters, and pages
+- Shows your progress in a structured format
+
+## GitHub Issue Hierarchy Example
+After completing the above steps, your repository will have:
+
+```
+Issue: Book: Crypto (#1)
+├─ Issue: Chapter: RSA (#2)
+│  └─ Issue: Page: WhatIsRSA (RSA) (#3)
+└─ Issue: Chapter: Elliptic Curves (#4)
+   ├─ Issue: Page: Introduction to EC (#5)
+   └─ Issue: Page: ECC vs RSA (#6)
+```
+
+Corresponding local directory structure:
+```
+src/Crypto/
+├── RSA/
+│   └── WhatIsRSA.md
+└── EllipticCurves/
+    ├── Introduction.md
+    └── Comparison.md
+```
 
 
 ## LICENSE
@@ -202,8 +258,7 @@ ISC License. It is almost the same as MIT License.
   - /script/subcmds/subcmdname.d[dir]
   - /script/subcmds/subcmdname.d/cmdname[bash]
   - /script/subcmds/subcmdname.d/subcmds/subsubcmdname[bash]
-- Indent: 2 spaces or tab
-- You havta do `shfmt`
+- Indent: 2 spaces
 - You havta add `set -euo pipfail` to head of bash file
 - Shebang is allowd only `#!/us/bin/env bash`
 - tag `v*` commit to Release

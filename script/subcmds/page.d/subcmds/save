@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #? Save a page (commit and push)
 #? Usage: tb2 page save -c CHAPTERNAME -b BOOKNAME -p PAGENAME [-q]
-#?   or: tb2 page save BOOKNAME/CHAPTERNAME/PAGENAME [-q]
 #? Opts:
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
@@ -19,13 +18,6 @@ chapterName=""
 pageName=""
 exit_missConf=false
 
-# Handle positional argument format: BOOKNAME/CHAPTERNAME/PAGENAME
-if [[ $# -ge 1 && "$1" == *"/"* && "$1" != -* ]]; then
-  IFS='/' read -r bookName chapterName pageName <<< "$1"
-  shift
-fi
-
-# Handle option format: -b BOOKNAME -c CHAPTERNAME -p PAGENAME [-q]
 while getopts "b:c:p:q" opt; do
   case $opt in
     b)
@@ -77,11 +69,12 @@ if [[ ! -f "$pageFile" ]]; then
 fi
 log "done."
 
+log "Committing and pushing page changes..."
 run "git add \"$pageFile\""
 run "git commit -m \"Page: $pageName in $chapterName\""
 log "done."
 
-log "Pushing changes to '$branch'..."
+log "Pushing changes..."
 run "git push"
 log "done."
 
