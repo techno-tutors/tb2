@@ -22,7 +22,7 @@ info "Running shfmt..."
 shfmt -i 2 -w "${FILES[@]}"
 info "-----------------------------------------------"
 info "Running shellcheck..."
-shellcheck -x "${FILES[@]}"
+shellcheck --external-sources "${FILES[@]}"
 
 info "Checking strict mode (set -euo pipefail)..."
 for f in "${FILES[@]}"; do

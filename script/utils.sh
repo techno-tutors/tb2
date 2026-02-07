@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
-
 ESC="\033["
 RESET="${ESC}0m"
 BOLD="${ESC}1m"
@@ -21,10 +19,11 @@ function warn() {
   printf "%b" "${YELLOW}${BOLD}[!]${RESET} $1 \n"
 }
 function error() {
-  printf "%b" "${RED}${BOLD}[-]${RESET} $1"
+  printf "%b" "${RED}${BOLD}[-]${RESET} $1 \n"
 }
 function ask() {
-  read -r -p "$(printf "%b" "${BOLD}${GREEN}[?]${RESET}$1\n\t${BOLD}${GREEN}>>${RESET}")" answer
+	printf "%b" "$(printf "%b" "${BOLD}${GREEN}[?]${RESET}$1\n\t${BOLD}${GREEN}>>${RESET}")"
+  read -r answer
   echo "$answer"
 }
 function catch() {
@@ -46,7 +45,7 @@ function checkConf() {
   exit_ifMissConf=${1:-true}
   shift
   for conf in "$@"; do
-    if ! "$base_dir/tb2" config get "$conf" >/dev/null 2>&1; then
+    if ! "./tb2" config get "$conf" >/dev/null 2>&1; then
       if $exit_ifMissConf; then
         warn "$conf is not set in the configuration."
         info "Exit."
@@ -57,9 +56,9 @@ function checkConf() {
         ans=$(ask "Do you want to set it to continue now [y] or exit[n]? (y/n)")
         if [[ "$ans" == "y" || "$ans" == "Y" ]]; then
           value=$(ask "What's your \"$conf\" value?")
-          run "$base_dir/tb2 config set $conf \"$value\""
+          run "./tb2 config set $conf \"$value\""
           log "Checking..."
-          value=$("$base_dir/tb2" config get "$conf")
+          value=$("./tb2" config get "$conf")
           if [[ -z "$value" ]]; then
             error "Failed to set $conf."
             warn "Exit."
@@ -88,7 +87,7 @@ function mustVar() {
     fi
   done
 }
-function gh.chkAvailable() {
+function gh_chkAvailable() {
   # Check if gh is installed
   info "Checking GitHub CLI availability..."
   if ! command -v gh >/dev/null 2>&1; then
@@ -103,7 +102,7 @@ function gh.chkAvailable() {
   fi
   return 0
 }
-function mdbook.chkAvailable() {
+function mdbook_chkAvailable() {
   # Check if mdbook is installed
   info "Checking mdBook availability..."
   if ! command -v mdbook >/dev/null 2>&1; then
@@ -121,7 +120,7 @@ function mdbook.chkAvailable() {
   info "Checking mdBook 'src' directory existence..."
   info "Lookig for default source directory config"
   checkConf true MDBOOK_SRCDIR
-  srcdir=$("$base_dir/tb2" config get MDBOOK_SRCDIR)
+  srcdir=$("./tb2" config get MDBOOK_SRCDIR)
   if [[ -z "$srcdir" ]]; then
     info "No custom source directory configured. Using default 'src'."
     srcdir="src"

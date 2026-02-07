@@ -5,16 +5,12 @@ set -euo pipefail
 base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
 source "$base_dir/utils.sh"
 
-#--------------------------------#
-#    TB2: TextBook ToolBox       #
-#--------------------------------#
-
-if ! mdbook.chkAvailable; then
+if ! mdbook_chkAvailable; then
   warn "Exit.."
   exit 1
 fi
 
-if ! gh.chkAvailable; then
+if ! gh_chkAvailable; then
   warn "Exit.."
   exit 1
 fi
@@ -27,7 +23,7 @@ case "${1:-}" in
     "$base_dir/subcmds/help.d/help"
     ;;
   *)
-    if [[ ! -f "$base_dir/subcmds/$1.d/$1"]] || [[ ! -x "$base_dir/subcmds/$1.d/$1" ]]; then
+    if [[ ! -f "$base_dir/subcmds/$1.d/$1" ]] || [[ ! -x "$base_dir/subcmds/$1.d/$1" ]]; then
       warn "Unknown subcommand: $1"
       info "Run '$0 --help' for usage."
       exit 1
