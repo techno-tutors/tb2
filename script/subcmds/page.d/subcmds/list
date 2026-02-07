@@ -52,7 +52,7 @@ log "=========================="
 if gh_isManualMode; then
   info "Remote list is disabled in manual mode."
 else
-  run gh_findIssue "$projectName" "Page:"
+  run gh_findIssue "$projectName" "Page: .*($chapterName)"
 fi
 info "=Local [mdBook pages in $bookName/$chapterName]="
 log "=========================================="

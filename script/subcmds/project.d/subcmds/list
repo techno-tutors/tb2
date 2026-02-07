@@ -39,7 +39,7 @@ if [[ ! -d "$srcDir" ]]; then
   info "No books found."
   exit 0
 fi
-
+shopt -s nullglob
 if ls -d "$srcDir"/*/ >/dev/null 2>&1; then
   find "$srcDir" -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -r -d '' bookPath; do
     bookName=$(basename "$bookPath")
@@ -65,6 +65,6 @@ if ls -d "$srcDir"/*/ >/dev/null 2>&1; then
 else
   info "No books found in '$srcDir'."
 fi
-
+shopt -u nullglob
 log "========================================"
 exit 0

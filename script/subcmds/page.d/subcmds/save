@@ -16,7 +16,7 @@ bookName=""
 chapterName=""
 pageName=""
 
-while getopts "b:c:p:q" opt; do
+while getopts "b:c:p:" opt; do
   case $opt in
   b)
     bookName="$OPTARG"

@@ -38,9 +38,11 @@ function catch() {
 }
 function run() {
   info "Running> $*"
+  trap 'set -e' RETURN
+  set +e
   "$@"
   catch $?
-  return 0
+  return $?
 }
 function useConf() {
   local key="$1"
@@ -52,7 +54,7 @@ function useConf() {
   if [[ -z "$val" ]]; then
     error "Config '$key' is not set."
     echo "Run: tb2 config set $key <value>"
-		exit 1
+    exit 1
   fi
 
   eval "$__resultvar=\"\$val\""
@@ -71,13 +73,13 @@ function gh_chkAvailable() {
   # Check if gh is installed
   info "Checking GitHub CLI availability..."
   if ! command -v gh >/dev/null 2>&1; then
-    warn "GitHub CLI (gh) is not installed. Please install it from https://cli.github.com/ or your package manager.\n"
+    warn "GitHub CLI (gh) is not installed. Please install it from https://cli.github.com/ or your package manager."
     return 1
   fi
   # Check if user is logged in
   info "Checking GitHub CLI user auth status..."
   if ! gh auth status >/dev/null 2>&1; then
-    warn "You are not logged in to GitHub CLI. Please run 'gh auth login' first.\n"
+    warn "You are not logged in to GitHub CLI. Please run 'gh auth login' first."
     return 1
   fi
   return 0
@@ -86,14 +88,14 @@ function mdbook_chkAvailable() {
   # Check if mdbook is installed
   info "Checking mdBook availability..."
   if ! command -v mdbook >/dev/null 2>&1; then
-    warn "mdBook is not installed. Please install it from https://github.com/rust-lang/mdBook or your package manager.\n"
+    warn "mdBook is not installed. Please install it from https://github.com/rust-lang/mdBook or your package manager."
     return 1
   fi
   # Check if we are in an mdBook project directory
   info "Checking if current directory is an mdBook project..."
   log "checking for book.toml file..."
   if [[ ! -f book.toml ]]; then
-    warn "This directory is not root of mdBook project. Please run this command in the root directory of your mdBook project.\n"
+    warn "This directory is not root of mdBook project. Please run this command in the root directory of your mdBook project."
     return 1
   fi
   # Check src directory exists
@@ -108,7 +110,7 @@ function mdbook_chkAvailable() {
     info "Using configured source directory: '$srcdir'"
   fi
   if [[ ! -d "$srcdir" ]]; then
-    warn "mdBook '$srcdir' directory not found. Please ensure you are in a valid mdBook project directory.\n"
+    warn "mdBook '$srcdir' directory not found. Please ensure you are in a valid mdBook project directory."
     return 1
   fi
   info "mdBook project directory confirmed."
@@ -192,7 +194,7 @@ function s_gitCommit() {
   git push origin "$current"
 }
 function git_chkBranch() {
-  branch=$1
+  local branch=$1
   log "Using branch: $branch"
   log "Checking if exist of branch name..."
   if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo)" != "$branch" ]]; then

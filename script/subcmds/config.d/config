@@ -19,7 +19,7 @@ source "$ROOT/utils.sh"
 CONFIG_FILE="$ROOT/subcmds/config.d/config.list"
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
-  error "Config file not found: $CONFIG_FILE\n"
+  error "Config file not found: $CONFIG_FILE"
   echo
   exit 2
 fi
@@ -47,7 +47,7 @@ getConf() {
 	  echo "$GH_CLI_MODE"
   	;;
   *)
-    warn "Unknown key: $key\n"
+    warn "Unknown key: $key"
     echo
     return 1
     ;;
@@ -58,7 +58,7 @@ setConf() {
   local value="$2"
 
   if [[ ! -f "$CONFIG_FILE" ]]; then
-    error "Config file not found: $CONFIG_FILE\n"
+    error "Config file not found: $CONFIG_FILE"
     echo
     exit 1
   fi
@@ -84,7 +84,7 @@ setConf() {
   	;;
 
   *)
-    warn "Unknown key: $key\n"
+    warn "Unknown key: $key"
     echo
     return 1
     ;;
@@ -94,7 +94,7 @@ setConf() {
 case "${1:-}" in
 get)
   if [[ $# -lt 2 ]]; then
-    error "Key required for 'get' subcommand\n"
+    error "Key required for 'get' subcommand"
     echo
     exit 1
   fi
@@ -102,14 +102,14 @@ get)
   ;;
 set)
   if [[ $# -lt 3 ]]; then
-    error "Key and value required for 'set' subcommand\n"
+    error "Key and value required for 'set' subcommand"
     echo
     exit 1
   fi
   setConf "$2" "$3"
   ;;
 *)
-  error "Unknown subcommand: $1\n"
+  error "Unknown subcommand: $1"
   echo
   exit 1
   ;;

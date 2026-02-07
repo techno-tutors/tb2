@@ -39,30 +39,19 @@ useConf PROJECT_NAME projectName
 log "done."
 
 bookDir="$srcDir/$bookName"
+echo "=== Local chapters ($bookName) ==="
 
-info "=Remote [GitHub Issues]="
-log "=========================="
-if gh_isManualMode; then
-  info "Remote list is disabled in manual mode."
-else
-  run gh_findIssue "$projectName" "Chapter:"
-fi
-info "=Local [mdBook directory chapters in $bookName]="
-log "=========================================="
+shopt -s nullglob
+for d in "$bookDir"/*/; do
+  echo "- [$bookName] $(basename "$d")"
+done
+shopt -u nullglob
 
-if [[ ! -d "$bookDir" ]]; then
-  warn "Book directory '$bookDir' does not exist."
-  info "No chapters found."
+echo "=== Remote chapters ($bookName) ==="
+
+if ! issues=$(gh_findIssue "$projectName" "Chapter:.*\($bookName\)"); then
+  echo "No remote chapters."
 else
-  log "Listing directories in '$bookDir'..."
-  if ls -d "$bookDir"/* >/dev/null 2>&1; then
-		find "$bookDir" -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -r -d '' chapterPath; do
-			chapterPath=$(basename "$chapterPath")
-			log "$chapterPath"
-		done
-  else
-    info "No chapters found in '$bookName'."
-  fi
+  echo "$issues" | sed "s/^/- [$bookName] /"
 fi
-log "=========================================="
 exit 0

@@ -88,7 +88,7 @@ else
 fi
 
 log "Searching for parent chapter Issue..."
-chapterIssueNum=$(gh issue list --repo "$projectName" --search "title:\"Chapter: $chapterName\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
+chapterIssueNum=$(gh issue list --repo "$projectName" --search "title:\"Chapter: $chapterName\" \"($bookName)\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
 if [[ -z "$chapterIssueNum" ]]; then
   warn "Could not find Chapter Issue for '$chapterName'. Continuing without link."
   pageIssueBody="Page '$pageName' in chapter '$chapterName' of book '$bookName'"

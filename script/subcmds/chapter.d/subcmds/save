@@ -2,9 +2,8 @@
 #? Save a chapter (create pull request to draft branch)
 #? Usage: tb2 chapter save -c CHAPTERNAME -b BOOKNAME [-q]
 #? Opts:
-#?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
-#? config dependencies: GH_OWNER_NAME, TB2_OPERATION_BRANCH
+#? config dependencies: GH_OWNER_NAME, TB2_OPERATION_BRANCH, PROJECT_NAME
 
 set -euo pipefail
 
@@ -14,11 +13,8 @@ source "$ROOT/utils.sh"
 bookName=""
 chapterName=""
 
-while getopts "b:c:" opt; do
+while getopts "c:" opt; do
   case $opt in
-  b)
-    bookName="$OPTARG"
-    ;;
   c)
     chapterName="$OPTARG"
     ;;
@@ -43,18 +39,18 @@ log "Checking for config..."
 
 useConf GH_OWNER_NAME name
 useConf TB2_OPERATION_BRANCH branch
+useConf PROJECT_NAME projectName
 
 log "done."
 
 chapterBranch="chapter/$chapterName"
-repoName=$(basename "$(git rev-parse --show-toplevel)")
 
 info "Saving chapter: $chapterName in book: $bookName"
 log "Creating pull request from '$chapterBranch' to '$branch'..."
 
-run gh_createPR "$name/$repoName" "$branch" "$chapterBranch" \
-  "Chapter: $chapterName" \
-  "Chapter '$chapterName' in book '$bookName'"
+run gh_createPR "$projectName" "$branch" "$chapterBranch"\
+  "Add chapter: $chapterName ($bookName)" \
+  "This PR adds chapter $chapterName to book $bookName."
 log "done."
 info "Chapter '$chapterName' saved successfully."
 exit 0
