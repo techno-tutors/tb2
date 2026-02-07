@@ -69,12 +69,12 @@ fi
 log "done."
 
 log "Committing and pushing page changes..."
-run "git add \"$pageFile\""
-run "git commit -m \"Page: $pageName in $chapterName\""
+run git add "$pageFile"
+run git commit -m "Page: $pageName in $chapterName" || warn "commit failed"
 log "done."
 
 log "Pushing changes..."
-run "git push"
+run git push
 log "done."
 
 info "Page '$pageName' saved successfully."

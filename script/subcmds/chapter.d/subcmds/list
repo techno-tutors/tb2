@@ -29,13 +29,21 @@ while getopts "b:" opt; do
 done
 
 log "Checking for config..."
-checkConf true "MDBOOK_SRC_DIR"
+checkConf true "MDBOOK_SRC_DIR" "PROJECT_NAME"
 srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-mustVar true "srcDir"
+projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
+mustVar true "srcDir" "projectName"
 log "done."
 
 bookDir="$srcDir/$bookName"
 
+info "=Remote [GitHub Issues]="
+log "=========================="
+if gh_isManualMode; then
+  info "Remote list is disabled in manual mode."
+else
+  run gh_findIssue "$projectName" "Chapter:"
+fi
 info "=Local [mdBook directory chapters in $bookName]="
 log "=========================================="
 
@@ -45,7 +53,10 @@ if [[ ! -d "$bookDir" ]]; then
 else
   log "Listing directories in '$bookDir'..."
   if ls -d "$bookDir"/* >/dev/null 2>&1; then
-    ls -d "$bookDir"/* | xargs -n1 basename
+		find "$bookDir" -maxdepth 1 -mindpth 1 -type d -print0 | while IFS= read -r -d '' chapterPath; do
+			chapterPath=$(basename "$chapterPath")
+			log $chapterPath
+		done
   else
     info "No chapters found in '$bookName'."
   fi

@@ -40,13 +40,20 @@ if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
 fi
 
 log "Checking for config..."
-checkConf true "MDBOOK_SRC_DIR"
+checkConf true "MDBOOK_SRC_DIR" "PROJECT_NAME"
 srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-mustVar true "srcDir"
+projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
+mustVar true "srcDir" "projectName"
 log "done."
 
 chapterDir="$srcDir/$bookName/$chapterName"
-
+info "=Remote [GitHub Issues]="
+log "=========================="
+if gh_isManualMode; then
+  info "Remote list is disabled in manual mode."
+else
+  run gh_findIssue "$projectName" "Page:"
+fi
 info "=Local [mdBook pages in $bookName/$chapterName]="
 log "=========================================="
 
@@ -55,6 +62,6 @@ if [[ ! -d "$chapterDir" ]]; then
   exit 1
 fi
 
-run "ls -1 \"$chapterDir\"/*.md 2>/dev/null | sed 's|.*/||;s|\.md$||' || echo 'No pages found.'"
+run ls -1 "$chapterDir"/*.md 2>/dev/null | sed 's|.*/||;s|\.md$||' || echo 'No pages found.'
 log "=========================================="
 exit 0

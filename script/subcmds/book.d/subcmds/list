@@ -17,10 +17,16 @@ log "done."
 
 info "=Remote [GitHub Issues]="
 log "=========================="
-run "gh issue list --repo \"$projectName\" --search \"title:Book:\" --state all"
-
+if gh_isManualMode; then
+  info "Remote list is disabled in manual mode."
+else
+  run gh_findIssue "$projectName" "Book:"
+fi
 info "=Local [mdBook directory]="
 log "=========================="
-run "ls -d ./${srcDir:-src}/*/ 2>/dev/null || echo 'No local books found.'"
+find "${srcDir:-src}" -maxdepth 1 -mindpth 1 -type d -print0 | while IFS= read -r -d '' bookPath; do
+	bookPath=$(basename "$bookPath")
+	log $bookPath
+done
 log "========================"
 exit 0

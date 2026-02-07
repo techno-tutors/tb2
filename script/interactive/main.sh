@@ -38,7 +38,7 @@ while true; do
     ;;
   *)
     if [[ -x "$base_dir/tb2" ]]; then
-      run "$base_dir/tb2 $cmd"
+      run "$base_dir/tb2" "$cmd"
     else
       warn "Unknown command: $cmd"
     fi

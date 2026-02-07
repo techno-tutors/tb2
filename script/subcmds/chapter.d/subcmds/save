@@ -52,12 +52,14 @@ mustVar "$exit_missConf" "name" "branch"
 log "done."
 
 chapterBranch="chapter/$chapterName"
-repoName=$(basename $(git rev-parse --show-toplevel))
+repoName=$(basename "$(git rev-parse --show-toplevel)")
 
 info "Saving chapter: $chapterName in book: $bookName"
 log "Creating pull request from '$chapterBranch' to '$branch'..."
 
-run "gh pr create --repo \"$name/$repoName\" --base \"$branch\" --head \"$chapterBranch\" --title \"Chapter: $chapterName\" --body \"Chapter '$chapterName' in book '$bookName'\""
+run gh_createPR "$name/$repoName" "$branch" "$chapterBranch" \
+  "Chapter: $chapterName" \
+  "Chapter '$chapterName' in book '$bookName'"
 log "done."
 info "Chapter '$chapterName' saved successfully."
 exit 0

@@ -43,6 +43,9 @@ getConf() {
   "PROJECT_NAME")
     echo "$PROJECT_NAME"
     ;;
+	"GH_CLI_MODE")
+	  echo "$GH_CLI_MODE"
+  	;;
   *)
     warn "Unknown key: $key\n"
     echo
@@ -76,6 +79,10 @@ setConf() {
   "PROJECT_NAME")
     sed -i.bak "s|^PROJECT_NAME=.*$|PROJECT_NAME=\"$value\"|" "$CONFIG_FILE"
     ;;
+	"GH_CLI_MODE")
+  	sed -i.bak "s|^GH_CLI_MODE=.*$|GH_CLI_MODE=\"$value\"|" "$CONFIG_FILE"
+  	;;
+
   *)
     warn "Unknown key: $key\n"
     echo

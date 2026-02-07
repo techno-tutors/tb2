@@ -36,7 +36,7 @@ function catch() {
   fi
 }
 function run() {
-  info "Runnning> $*"
+  info "Running> $*"
   "$@"
   catch $?
   return $?
@@ -56,7 +56,7 @@ function checkConf() {
         ans=$(ask "Do you want to set it to continue now [y] or exit[n]? (y/n)")
         if [[ "$ans" == "y" || "$ans" == "Y" ]]; then
           value=$(ask "What's your \"$conf\" value?")
-          run "./tb2 config set $conf \"$value\""
+          run "./tb2" config set "$conf" "$value"
           log "Checking..."
           value=$("./tb2" config get "$conf")
           if [[ -z "$value" ]]; then
@@ -87,7 +87,17 @@ function mustVar() {
     fi
   done
 }
+function gh_isManualMode() {
+  mode=$("./tb2" config get GH_CLI_MODE 2>/dev/null || echo "auto")
+  if [[ "$mode" == "manual" ]]; then
+    return 0
+  fi
+  return 1
+}
 function gh_chkAvailable() {
+  if gh_isManualMode; then
+    return 0
+  fi
   # Check if gh is installed
   info "Checking GitHub CLI availability..."
   if ! command -v gh >/dev/null 2>&1; then
@@ -118,9 +128,9 @@ function mdbook_chkAvailable() {
   fi
   # Check src directory exists
   info "Checking mdBook 'src' directory existence..."
-  info "Lookig for default source directory config"
-  checkConf true MDBOOK_SRCDIR
-  srcdir=$("./tb2" config get MDBOOK_SRCDIR)
+  info "Looking for default source directory config"
+  checkConf true MDBOOK_SRC_DIR
+  srcdir=$("./tb2" config get MDBOOK_SRC_DIR)
   if [[ -z "$srcdir" ]]; then
     info "No custom source directory configured. Using default 'src'."
     srcdir="src"
@@ -133,4 +143,64 @@ function mdbook_chkAvailable() {
   fi
   info "mdBook project directory confirmed."
   return 0
+}
+function gh_createIssue() {
+  local repo="$1"
+  local title="$2"
+  local body="$3"
+
+  if gh_isManualMode; then
+    info "GitHub CLI manual mode is enabled."
+    echo
+    info "Please create the following GitHub Issue manually:"
+    echo "--------------------------------------------"
+    echo "Repository: $repo"
+    echo "Title: $title"
+    echo "Body:"
+    echo "$body"
+    echo "--------------------------------------------"
+    return 0
+  fi
+
+  run gh issue create --repo "$repo" --title "$title" --body "$body"
+}
+function gh_createPR() {
+  local repo="$1"
+  local base="$2"
+  local head="$3"
+  local title="$4"
+  local body="$5"
+
+  if gh_isManualMode; then
+    info "GitHub CLI manual mode is enabled."
+    echo
+    info "Please create the following Pull Request manually:"
+    echo "--------------------------------------------"
+    echo "Repository: $repo"
+    echo "Base branch: $base"
+    echo "Head branch: $head"
+    echo "Title: $title"
+    echo "Body:"
+    echo "$body"
+    echo "--------------------------------------------"
+    return 0
+  fi
+
+  run gh pr create --repo "$repo" --base "$base" --head "$head" --title "$title" --body "$body"
+}
+function gh_findIssue() {
+  local repo="$1"
+  local search="$2"
+
+  if gh_isManualMode; then
+    warn "Manual mode: cannot auto-search GitHub issues."
+    echo ""
+    echo "Please find issue manually in repository:"
+    echo "Repo: $repo"
+    echo "Search query: $search"
+    echo ""
+    return 1
+  fi
+
+  gh issue list --repo "$repo" --search "$search" --json number --jq '.[0].number // empty'
 }

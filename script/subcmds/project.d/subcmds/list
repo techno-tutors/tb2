@@ -31,7 +31,7 @@ srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
 mustVar true "srcDir"
 log "done."
 
-info "=All Projects: Books, Chapters & Pages="
+info "=Local [mdBooks project]="
 log "========================================"
 
 if [[ ! -d "$srcDir" ]]; then
@@ -41,17 +41,17 @@ if [[ ! -d "$srcDir" ]]; then
 fi
 
 if ls -d "$srcDir"/*/ >/dev/null 2>&1; then
-  ls -d "$srcDir"/*/ | while read -r bookPath; do
+  find "$srcDir" -maxdepth 1 -mindpth 1 -type d -print0 | while IFS= read -r -d '' bookPath; do
     bookName=$(basename "$bookPath")
     info "[bok]$bookName"
 
     if ls -d "$bookPath"/*/ >/dev/null 2>&1; then
-      ls -d "$bookPath"/*/ | while read -r chapterPath; do
+      find "$srcDir" -maxdepth 1 -mindpth 1 -type d -print0 | while IFS= read -r -d '' chapterPath; do
         chapterName=$(basename "$chapterPath")
         log "  [chap]$chapterName"
         if [[ "$show_pages" == true ]]; then
           if ls "$chapterPath"/*.md >/dev/null 2>&1; then
-            ls "$chapterPath"/*.md | while read -r pagePath; do
+            find "${chapterPath}/*.md" -maxdepth 1 -mindpth 1 -type f -print0 | while IFS= read -r -d '' pagePath; do
               pageName=$(basename "$pagePath" .md)
               log "    [pag]$pageName"
             done

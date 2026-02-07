@@ -86,11 +86,11 @@ else
   log "Checking if we're on branch '$branch'..."
   if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo)" != "$branch" ]]; then
     log "Switching to branch '$branch'..."
-    run "git switch $branch"
+    run git switch "$branch"
     log "done."
   fi
   log "Creating and switching to branch '$chapterBranch'..."
-  run "git switch -c $chapterBranch"
+  run git switch -c "$chapterBranch"
   log "done."
 fi
 
@@ -100,12 +100,12 @@ if [[ -d "$chapterDir" ]]; then
   warn "Directory '$chapterDir' already exists locally. Skipping mkdir."
 else
   log "Creating local directory '$chapterDir'..."
-  run "mkdir -p \"$chapterDir\""
+  run mkdir -p "$chapterDir"
   log "done."
 fi
 
 log "Creating GitHub issue for chapter..."
-run "gh issue create --repo \"$projectName\" --title \"Chapter: $chapterName\" --body \"$bookIssueBody\" || true"
+run gh_createIssue "$projectName" "Chapter: $chapterName" "$bookIssueBody"
 log "done."
 
 ans=$(ask "Do you want to commit&push the repository now chapter branch? (y/n)")
@@ -115,9 +115,9 @@ if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
 fi
 
 log "Committing and pushing changes..."
-run "git add \"$chapterDir\""
-run "git commit -m \"Create chapter $chapterName\" || true"
-run "git push -u origin $chapterBranch"
+run git add "$chapterDir"
+run git commit -m "Create chapter $chapterName" || warn "commit failed"
+run git push -u origin "$chapterBranch"
 log "done."
 info "New chapter '$chapterName' created successfully."
 exit 0

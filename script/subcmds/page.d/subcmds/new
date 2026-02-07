@@ -88,7 +88,7 @@ if [[ -f "$pageFile" ]]; then
   warn "Page file '$pageFile' already exists. Skipping creation."
 else
   log "Creating page file '$pageFile'..."
-  run "touch \"$pageFile\""
+  run touch "$pageFile"
   log "done."
 fi
 
@@ -103,7 +103,7 @@ else
 fi
 
 log "Creating GitHub issue for page..."
-run "gh issue create --repo \"$projectName\" --title \"Page: $pageName ($chapterName)\" --body \"$pageIssueBody\" || true"
+run gh issue create --repo "$projectName" --title "Page: $pageName ($chapterName)" --body "$pageIssueBody" "||" true
 log "done."
 
 info "Page '$pageName' created successfully."

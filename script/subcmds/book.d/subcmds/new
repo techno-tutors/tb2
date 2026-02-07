@@ -47,7 +47,7 @@ mustVar "$exit_missConf" "seriesName" "name" "srcDir" "branch" "projectName"
 log "done."
 
 info "Creating new book Issue: $bookName"
-run "gh issue create --repo \"$projectName\" --title \"Book: $bookName\" --body \"New book project '$bookName'\" || true"
+run gh_createIssue "$projectName" "Book: $bookName" "New book project '$bookName'"
 log "done."
 log "Issue created on GitHub successfully."
 
@@ -57,7 +57,7 @@ if [[ -d "$srcDir/$bookName" ]]; then
   warn "Directory '$srcDir/$bookName' already exists locally. Skipping mkdir."
 else
   log "Creating local directory '$srcDir/$bookName'..."
-  run "mkdir \"$srcDir/$bookName\""
+  run mkdir "$srcDir/$bookName"
   ls "$srcDir/$bookName" >/dev/null 2>&1 || {
     error "Failed to create or access local directory '$srcDir/$bookName'."
     exit 1
@@ -80,7 +80,7 @@ if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo)" != "$branch" ]]; 
     log "Branch '$branch' does not exist."
     ans=$(ask "Create branch[c] or Exit[e]?")
     if [[ "$ans" == "c" || "$ans" == "C" ]]; then
-      run "git switch -c $branch"
+      run git switch -c "$branch"
       log "done."
     else
       info "Exit."
@@ -88,16 +88,16 @@ if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo)" != "$branch" ]]; 
     fi
   fi
   log "Switching to branch '$branch'..."
-  run "git switch $branch"
+  run git switch "$branch"
   log "done."
 else
   log "Already on branch '$branch'."
   log "done."
 fi
 
-run "git add \"$srcDir/$bookName\""
-run "git commit -m \"Initial commit for book $bookName\""
-run "git push -u origin $branch"
+run git add "$srcDir/$bookName"
+run git commit -m "Initial commit for book $bookName" || warn "commit failed"
+run git push -u origin "$branch"
 log "done."
 info "New book project '$bookName' created successfully."
 exit 0
