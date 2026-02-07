@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 #shellcheck source=script/utils.sh
-source "$base_dir/utils.sh"
+source "$ROOT/utils.sh"
 #shellcheck source=script/interactive/funcs.sh
-source "$base_dir/interactive/funcs.sh"
+source "$ROOT/interactive/funcs.sh"
 
 info "Entering interactive mode. Type 'exit' to quit."
 log "#--------------------------------#"
@@ -37,8 +36,8 @@ while true; do
     interactive_project
     ;;
   *)
-    if [[ -x "$base_dir/tb2" ]]; then
-      run "$base_dir/tb2" "$cmd"
+    if [[ -x "$ROOT/tb2" ]]; then
+      run "$ROOT/tb2" "$cmd"
     else
       warn "Unknown command: $cmd"
     fi

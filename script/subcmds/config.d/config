@@ -13,10 +13,10 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../.."
-source "$base_dir/utils.sh"
 
-CONFIG_FILE="$base_dir/subcmds/config.d/config.list"
+source "$ROOT/utils.sh"
+
+CONFIG_FILE="$ROOT/subcmds/config.d/config.list"
 
 if [[ ! -f "$CONFIG_FILE" ]]; then
   error "Config file not found: $CONFIG_FILE\n"

@@ -7,8 +7,8 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../.."
-source "$base_dir/utils.sh"
+
+source "$ROOT/utils.sh"
 
 case "${1:-}" in
 "")
@@ -17,15 +17,15 @@ case "${1:-}" in
   ;;
 "new")
   shift
-  "$base_dir/subcmds/page.d/subcmds/new" "$@"
+  "$ROOT/subcmds/page.d/subcmds/new" "$@"
   ;;
 "save")
   shift
-  "$base_dir/subcmds/page.d/subcmds/save" "$@"
+  "$ROOT/subcmds/page.d/subcmds/save" "$@"
   ;;
 "list")
   shift
-  "$base_dir/subcmds/page.d/subcmds/list" "$@"
+  "$ROOT/subcmds/page.d/subcmds/list" "$@"
   ;;
 *)
   warn "Unknown subcmd '$1' for 'page'"

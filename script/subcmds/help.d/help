@@ -3,10 +3,10 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../.."
-subcmd_dir="$base_dir/subcmds"
 
-source "$base_dir/utils.sh"
+subcmd_dir="$ROOT/subcmds"
+
+source "$ROOT/utils.sh"
 
 info "tb2 - TextBook ToolBox"
 log "GitHub automation & textbook builder CLI"

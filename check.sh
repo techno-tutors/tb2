@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/script"
+
+if git_root=$(git rev-parse --show-toplevel 2>/dev/null); then
+  export ROOT="$git_root/script"
+else
+  dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/script"
+  export ROOT="$dir"
+fi
 #shellcheck source=script/utils.sh
-source "$base_dir/utils.sh"
+source "$ROOT/utils.sh"
 
 for cmd in shfmt shellcheck; do
   if ! command -v "$cmd" >/dev/null 2>&1; then

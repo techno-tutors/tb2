@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 #shellcheck source=script/utils.sh
-source "$base_dir/utils.sh"
+source "$ROOT/utils.sh"
 
 function show_help() {
   info "tb2 - TextBook ToolBox (Interactive Mode)"
@@ -30,10 +29,10 @@ function interactive_book() {
   case "$sub" in
   "1" | "new")
     name=$(ask "Book name")
-    "$base_dir/tb2" book new -b "$name"
+    "$ROOT/tb2" book new -b "$name"
     ;;
   "2" | "list")
-    "$base_dir/tb2" book list
+    "$ROOT/tb2" book list
     ;;
   *)
     warn "Unknown book subcommand."
@@ -52,16 +51,16 @@ function interactive_chapter() {
   "1" | "new")
     book=$(ask "Book name")
     chapter=$(ask "Chapter name")
-    "$base_dir/tb2" chapter new -b "$book" -c "$chapter"
+    "$ROOT/tb2" chapter new -b "$book" -c "$chapter"
     ;;
   "2" | "save")
     book=$(ask "Book name")
     chapter=$(ask "Chapter name")
-    "$base_dir/tb2" chapter save -b "$book" -c "$chapter"
+    "$ROOT/tb2" chapter save -b "$book" -c "$chapter"
     ;;
   "3" | "list")
     book=$(ask "Book name")
-    "$base_dir/tb2" chapter list -b "$book"
+    "$ROOT/tb2" chapter list -b "$book"
     ;;
   *)
     warn "Unknown chapter subcommand."
@@ -82,21 +81,21 @@ function interactive_page() {
     chapter=$(ask "Chapter name")
     page=$(ask "Page name? (empty for auto)")
     if [[ -z "$page" ]]; then
-      "$base_dir/tb2" page new -b "$book" -c "$chapter"
+      "$ROOT/tb2" page new -b "$book" -c "$chapter"
     else
-      "$base_dir/tb2" page new -b "$book" -c "$chapter" -p "$page"
+      "$ROOT/tb2" page new -b "$book" -c "$chapter" -p "$page"
     fi
     ;;
   "2" | "save")
     book=$(ask "Book name")
     chapter=$(ask "Chapter name")
     page=$(ask "Page name")
-    "$base_dir/tb2" page save -b "$book" -c "$chapter" -p "$page"
+    "$ROOT/tb2" page save -b "$book" -c "$chapter" -p "$page"
     ;;
   "3" | "list")
     book=$(ask "Book name")
     chapter=$(ask "Chapter name")
-    "$base_dir/tb2" page list -b "$book" -c "$chapter"
+    "$ROOT/tb2" page list -b "$book" -c "$chapter"
     ;;
   *)
     warn "Unknown page subcommand."
@@ -112,10 +111,10 @@ function interactive_project() {
   sub=$(ask "project")
   case "$sub" in
   "1" | "list")
-    "$base_dir/tb2" project list
+    "$ROOT/tb2" project list
     ;;
   "2" | "pages")
-    "$base_dir/tb2" project list -p
+    "$ROOT/tb2" project list -p
     ;;
   *)
     warn "Unknown project subcommand."

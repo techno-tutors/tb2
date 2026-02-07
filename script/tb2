@@ -2,8 +2,13 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")"&&pwd)"
-source "$base_dir/utils.sh"
+if git_root=$(git rev-parse --show-toplevel 2>/dev/null); then
+  export ROOT="$git_root/script"
+else
+	dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/script"
+  export ROOT="$dir"
+fi
+source "$ROOT/utils.sh"
 
 if ! mdbook_chkAvailable; then
   warn "Exit.."
@@ -17,17 +22,17 @@ fi
 
 case "${1:-}" in
   ""|"-i")
-    "$base_dir/interactive/main.sh" "${@:2}"
+    "$ROOT/interactive/main.sh" "${@:2}"
     ;;
   "--help"|"-h")
-    "$base_dir/subcmds/help.d/help"
+    "$ROOT/subcmds/help.d/help"
     ;;
   *)
-    if [[ ! -f "$base_dir/subcmds/$1.d/$1" ]] || [[ ! -x "$base_dir/subcmds/$1.d/$1" ]]; then
+    if [[ ! -f "$ROOT/subcmds/$1.d/$1" ]] || [[ ! -x "$ROOT/subcmds/$1.d/$1" ]]; then
       warn "Unknown subcommand: $1"
       info "Run '$0 --help' for usage."
       exit 1
     fi
-    "$base_dir/subcmds/$1.d/$1" "${@:2}"
+    "$ROOT/subcmds/$1.d/$1" "${@:2}"
     ;;
 esac

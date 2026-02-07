@@ -7,8 +7,8 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
-source "$base_dir/utils.sh"
+
+source "$ROOT/utils.sh"
 
 show_pages=false
 
@@ -27,7 +27,7 @@ done
 
 log "Checking for config..."
 checkConf true "MDBOOK_SRC_DIR"
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
+useConf MDBOOK_SRC_DIR srcDir
 mustVar true "srcDir"
 log "done."
 
@@ -41,22 +41,22 @@ if [[ ! -d "$srcDir" ]]; then
 fi
 
 if ls -d "$srcDir"/*/ >/dev/null 2>&1; then
-  find "$srcDir" -maxdepth 1 -mindpth 1 -type d -print0 | while IFS= read -r -d '' bookPath; do
+  find "$srcDir" -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -r -d '' bookPath; do
     bookName=$(basename "$bookPath")
     info "[bok]$bookName"
 
     if ls -d "$bookPath"/*/ >/dev/null 2>&1; then
-      find "$srcDir" -maxdepth 1 -mindpth 1 -type d -print0 | while IFS= read -r -d '' chapterPath; do
+      find "$bookPath" -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -r -d '' chapterPath; do
         chapterName=$(basename "$chapterPath")
         log "  [chap]$chapterName"
         if [[ "$show_pages" == true ]]; then
-          if ls "$chapterPath"/*.md >/dev/null 2>&1; then
-            find "${chapterPath}/*.md" -maxdepth 1 -mindpth 1 -type f -print0 | while IFS= read -r -d '' pagePath; do
-              pageName=$(basename "$pagePath" .md)
-              log "    [pag]$pageName"
-            done
-          fi
-        fi
+  			  if ls "$chapterPath"/*.md >/dev/null 2>&1; then
+  			    for pagePath in "$chapterPath"/*.md; do
+  			      pageName=$(basename "$pagePath" .md)
+  			      log "    [pag]$pageName"
+  			    done
+  			  fi
+  			fi
       done
     else
       log "  (no chapters)"

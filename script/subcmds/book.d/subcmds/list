@@ -5,14 +5,13 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
-source "$base_dir/utils.sh"
+
+source "$ROOT/utils.sh"
 
 log "Checking for config..."
 checkConf true "MDBOOK_SRC_DIR" "PROJECT_NAME"
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
-mustVar true "srcDir" "projectName"
+useConf MDBOOK_SRC_DIR srcDir
+useConf PROJECT_NAME projectName
 log "done."
 
 info "=Remote [GitHub Issues]="
@@ -24,9 +23,9 @@ else
 fi
 info "=Local [mdBook directory]="
 log "=========================="
-find "${srcDir:-src}" -maxdepth 1 -mindpth 1 -type d -print0 | while IFS= read -r -d '' bookPath; do
+find "${srcDir:-src}" -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -r -d '' bookPath; do
 	bookPath=$(basename "$bookPath")
-	log $bookPath
+	log "$bookPath"
 done
 log "========================"
 exit 0

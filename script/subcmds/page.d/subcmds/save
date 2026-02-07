@@ -10,8 +10,8 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
-source "$base_dir/utils.sh"
+
+source "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
@@ -51,8 +51,8 @@ fi
 
 log "Checking for config..."
 checkConf "$exit_missConf" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
+useConf MDBOOK_SRC_DIR srcDir
+useConf TB2_OPERATION_BRANCH branch
 mustVar "$exit_missConf" "srcDir" "branch"
 log "done."
 
@@ -67,10 +67,11 @@ if [[ ! -f "$pageFile" ]]; then
   exit 1
 fi
 log "done."
-
+chapterBranch="chapter/$chapterName"
+git_chkBranch "$chapterBranch"
 log "Committing and pushing page changes..."
 run git add "$pageFile"
-run git commit -m "Page: $pageName in $chapterName" || warn "commit failed"
+run git commit -m "Page: $pageName in $chapterName"
 log "done."
 
 log "Pushing changes..."

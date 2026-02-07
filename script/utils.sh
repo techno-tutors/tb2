@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2154
 set -euo pipefail
 
 ESC="\033["
@@ -41,54 +42,23 @@ function run() {
   catch $?
   return $?
 }
-function checkConf() {
-  exit_ifMissConf=${1:-true}
-  shift
-  for conf in "$@"; do
-    if ! "./tb2" config get "$conf" >/dev/null 2>&1; then
-      if $exit_ifMissConf; then
-        warn "$conf is not set in the configuration."
-        info "Exit."
-        exit 1
-      else
-        warn "$conf is not set in the configuration."
-        log "Please set it using 'tb2 config set $conf your_value'"
-        ans=$(ask "Do you want to set it to continue now [y] or exit[n]? (y/n)")
-        if [[ "$ans" == "y" || "$ans" == "Y" ]]; then
-          value=$(ask "What's your \"$conf\" value?")
-          run "./tb2" config set "$conf" "$value"
-          log "Checking..."
-          value=$("./tb2" config get "$conf")
-          if [[ -z "$value" ]]; then
-            error "Failed to set $conf."
-            warn "Exit."
-            exit 1
-          fi
-          printf -v "$conf" '%s' "$value"
-          log "done."
-        else
-          info "Exit."
-          exit 1
-        fi
-      fi
-    fi
-  done
-}
-function mustVar() {
-  exit_ifMissConf=${1:-true}
-  shift
-  for conf in "$@"; do
-    if [[ -z "${!conf}" ]]; then
-      warn "$conf is not set in the configuration."
-      if $exit_ifMissConf; then
-        info "Exit."
-        exit 1
-      fi
-    fi
-  done
+function useConf() {
+  local key="$1"
+  local __resultvar="$2"
+
+  local val
+  val=$(tb2 config get "$key" 2>/dev/null || true)
+
+  if [[ -z "$val" ]]; then
+    error "Config '$key' is not set."
+    echo "Run: tb2 config set $key <value>"
+    $exit_ifMissConf && exit 1
+  fi
+
+  eval "$__resultvar=\"\$val\""
 }
 function gh_isManualMode() {
-  mode=$("./tb2" config get GH_CLI_MODE 2>/dev/null || echo "auto")
+  useConf GH_CLI_MODE mode
   if [[ "$mode" == "manual" ]]; then
     return 0
   fi
@@ -130,7 +100,7 @@ function mdbook_chkAvailable() {
   info "Checking mdBook 'src' directory existence..."
   info "Looking for default source directory config"
   checkConf true MDBOOK_SRC_DIR
-  srcdir=$("./tb2" config get MDBOOK_SRC_DIR)
+  useConf MDBOOK_SRC_DIR srcdir
   if [[ -z "$srcdir" ]]; then
     info "No custom source directory configured. Using default 'src'."
     srcdir="src"
@@ -202,5 +172,50 @@ function gh_findIssue() {
     return 1
   fi
 
-  gh issue list --repo "$repo" --search "$search" --json number --jq '.[0].number // empty'
+  gh issue list --repo "$repo" --search "$search" --json number,title \
+    --jq '.[] | "\(.number): \(.title)"'
+}
+function s_gitCommit() {
+  local msg="$1"
+
+  if [[ -z $(git status --porcelain) ]]; then
+    info "Nothing to commit."
+    return
+  fi
+
+  git add .
+  git commit -m "$msg"
+
+  current=$(git branch --show-current)
+  info "Pushing branch: $current"
+
+  git push origin "$current"
+}
+function git_chkBranch() {
+  branch=$1
+  log "Using branch: $branch"
+  log "Checking if exist of branch name..."
+  if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo)" != "$branch" ]]; then
+    log "Branch '$branch' is not current branch."
+    log "Checking for branch existence..."
+    if git branch --list "$branch" >/dev/null 2>&1; then
+      log "Branch '$branch' exists."
+    else
+      log "Branch '$branch' does not exist."
+      ans=$(ask "Create branch[c] or Exit[e]?")
+      if [[ "$ans" == "c" || "$ans" == "C" ]]; then
+        run git switch -c "$branch"
+        log "done."
+      else
+        info "Exit."
+        exit 0
+      fi
+    fi
+    log "Switching to branch '$branch'..."
+    run git switch "$branch"
+    log "done."
+  else
+    log "Already on branch '$branch'."
+    log "done."
+  fi
 }

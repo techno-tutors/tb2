@@ -7,8 +7,8 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
-source "$base_dir/utils.sh"
+
+source "$ROOT/utils.sh"
 
 bookName=""
 
@@ -30,8 +30,8 @@ done
 
 log "Checking for config..."
 checkConf true "MDBOOK_SRC_DIR" "PROJECT_NAME"
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
+useConf MDBOOK_SRC_DIR srcDir
+useConf PROJECT_NAME projectName
 mustVar true "srcDir" "projectName"
 log "done."
 
@@ -53,9 +53,9 @@ if [[ ! -d "$bookDir" ]]; then
 else
   log "Listing directories in '$bookDir'..."
   if ls -d "$bookDir"/* >/dev/null 2>&1; then
-		find "$bookDir" -maxdepth 1 -mindpth 1 -type d -print0 | while IFS= read -r -d '' chapterPath; do
+		find "$bookDir" -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -r -d '' chapterPath; do
 			chapterPath=$(basename "$chapterPath")
-			log $chapterPath
+			log "$chapterPath"
 		done
   else
     info "No chapters found in '$bookName'."

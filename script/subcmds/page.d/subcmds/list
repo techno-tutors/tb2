@@ -8,8 +8,8 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
-source "$base_dir/utils.sh"
+
+source "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
@@ -41,8 +41,8 @@ fi
 
 log "Checking for config..."
 checkConf true "MDBOOK_SRC_DIR" "PROJECT_NAME"
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
+useConf MDBOOK_SRC_DIR srcDir 
+useConf PROJECT_NAME projectName 
 mustVar true "srcDir" "projectName"
 log "done."
 

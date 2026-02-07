@@ -7,8 +7,8 @@
 #? config dependencies: MDBOOK_SERIES_NAME, GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH, PROJECT_NAME
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
-source "$base_dir/utils.sh"
+
+source "$ROOT/utils.sh"
 
 bookName=""
 exit_missConf=false
@@ -38,11 +38,11 @@ fi
 
 log "Checking for config..."
 checkConf "$exit_missConf" "MDBOOK_SERIES_NAME" "GH_OWNER_NAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH" "PROJECT_NAME"
-seriesName=$("$base_dir/tb2" config get 'MDBOOK_SERIES_NAME')
-name=$("$base_dir/tb2" config get 'GH_OWNER_NAME')
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
-projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
+useConf MDBOOK_SERIES_NAME seriesName
+useConf GH_OWNER_NAME name
+useConf MDBOOK_SRC_DIR srcDir
+useConf TB2_OPERATION_BRANCH branch
+useConf PROJECT_NAME projectName
 mustVar "$exit_missConf" "seriesName" "name" "srcDir" "branch" "projectName"
 log "done."
 
@@ -69,34 +69,9 @@ if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
   info "Exit."
   exit 0
 fi
-log "Using branch: $branch"
-log "Checking if exist of branch name..."
-if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo)" != "$branch" ]]; then
-  log "Branch '$branch' is not current branch."
-  log "Checking for branch existence..."
-  if git branch --list "$branch" >/dev/null 2>&1; then
-    log "Branch '$branch' exists."
-  else
-    log "Branch '$branch' does not exist."
-    ans=$(ask "Create branch[c] or Exit[e]?")
-    if [[ "$ans" == "c" || "$ans" == "C" ]]; then
-      run git switch -c "$branch"
-      log "done."
-    else
-      info "Exit."
-      exit 0
-    fi
-  fi
-  log "Switching to branch '$branch'..."
-  run git switch "$branch"
-  log "done."
-else
-  log "Already on branch '$branch'."
-  log "done."
-fi
-
+git_chkBranch "$branch"
 run git add "$srcDir/$bookName"
-run git commit -m "Initial commit for book $bookName" || warn "commit failed"
+run git commit -m "Initial commit for book $bookName"
 run git push -u origin "$branch"
 log "done."
 info "New book project '$bookName' created successfully."

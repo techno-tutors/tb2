@@ -10,8 +10,8 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
-source "$base_dir/utils.sh"
+
+source "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
@@ -51,10 +51,10 @@ fi
 
 log "Checking for config..."
 checkConf "$exit_missConf" "GH_OWNER_NAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH" "PROJECT_NAME"
-name=$("$base_dir/tb2" config get 'GH_OWNER_NAME')
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
-projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
+useConf GH_OWNER_NAME name 
+useConf MDBOOK_SRC_DIR srcDir 
+useConf TB2_OPERATION_BRANCH branch 
+useConf PROJECT_NAME projectName 
 mustVar "$exit_missConf" "name" "srcDir" "branch" "projectName"
 log "done."
 
@@ -103,7 +103,7 @@ else
 fi
 
 log "Creating GitHub issue for page..."
-run gh issue create --repo "$projectName" --title "Page: $pageName ($chapterName)" --body "$pageIssueBody" "||" true
+run gh_createIssue "$projectName" "Page: $pageName ($chapterName)" "$pageIssueBody"
 log "done."
 
 info "Page '$pageName' created successfully."

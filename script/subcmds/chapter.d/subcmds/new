@@ -9,8 +9,8 @@
 
 set -euo pipefail
 
-base_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../../.."
-source "$base_dir/utils.sh"
+
+source "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
@@ -46,10 +46,11 @@ fi
 
 log "Checking for config..."
 checkConf "$exit_missConf" "GH_OWNER_NAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH" "PROJECT_NAME"
-name=$("$base_dir/tb2" config get 'GH_OWNER_NAME')
-srcDir=$("$base_dir/tb2" config get 'MDBOOK_SRC_DIR')
-branch=$("$base_dir/tb2" config get 'TB2_OPERATION_BRANCH')
-projectName=$("$base_dir/tb2" config get 'PROJECT_NAME')
+useConf GH_OWNER_NAME name
+useConf MDBOOK_SRC_DIR srcDir
+useConf TB2_OPERATION_BRANCH branch
+useConf PROJECT_NAME projectName
+
 mustVar "$exit_missConf" "name" "srcDir" "branch" "projectName"
 log "done."
 
@@ -75,24 +76,7 @@ else
   bookIssueBody="Chapter '$chapterName' in book '$bookName'. Parent Issue: #$bookIssueNum"
 fi
 
-log "Using branch: $branch"
-log "Checking if chapter branch already exists..."
-chapterBranchExists=false
-if git branch --list "$chapterBranch" >/dev/null 2>&1; then
-  chapterBranchExists=true
-  warn "Branch '$chapterBranch' already exists."
-else
-  log "Creating chapter branch from '$branch'..."
-  log "Checking if we're on branch '$branch'..."
-  if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo)" != "$branch" ]]; then
-    log "Switching to branch '$branch'..."
-    run git switch "$branch"
-    log "done."
-  fi
-  log "Creating and switching to branch '$chapterBranch'..."
-  run git switch -c "$chapterBranch"
-  log "done."
-fi
+git_chkBranch "$chapterBranch"
 
 log "Checking for local directory..."
 chapterDir="$srcDir/$bookName/$chapterName"
@@ -116,7 +100,7 @@ fi
 
 log "Committing and pushing changes..."
 run git add "$chapterDir"
-run git commit -m "Create chapter $chapterName" || warn "commit failed"
+run git commit -m "Create chapter $chapterName"
 run git push -u origin "$chapterBranch"
 log "done."
 info "New chapter '$chapterName' created successfully."
