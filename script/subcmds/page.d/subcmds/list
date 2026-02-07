@@ -62,6 +62,6 @@ if [[ ! -d "$chapterDir" ]]; then
   exit 1
 fi
 
-run ls -1 "$chapterDir"/*.md 2>/dev/null | sed 's|.*/||;s|\.md$||' || echo 'No pages found.'
+run ls -1 "$chapterDir"/*.md 2>/dev/null | sed 's|.*/||;s|\.md$||'
 log "=========================================="
 exit 0

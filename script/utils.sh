@@ -40,7 +40,7 @@ function run() {
   info "Running> $*"
   "$@"
   catch $?
-  return $?
+  return 0
 }
 function useConf() {
   local key="$1"
@@ -52,7 +52,7 @@ function useConf() {
   if [[ -z "$val" ]]; then
     error "Config '$key' is not set."
     echo "Run: tb2 config set $key <value>"
-    $exit_ifMissConf && exit 1
+		exit 1
   fi
 
   eval "$__resultvar=\"\$val\""

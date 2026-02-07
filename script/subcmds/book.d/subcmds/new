@@ -3,7 +3,6 @@
 #? Usage: tb2 book new -b BOOKNAME
 #? Opts:
 #?   -b         BOOKNAME
-#?   -q         exit if config variables are missing.
 #? config dependencies: MDBOOK_SERIES_NAME, GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH, PROJECT_NAME
 set -euo pipefail
 
@@ -11,14 +10,10 @@ set -euo pipefail
 source "$ROOT/utils.sh"
 
 bookName=""
-exit_ifMissConf=false
-while getopts "b:q" opt; do
+while getopts "b:" opt; do
   case $opt in
   b)
     bookName="$OPTARG"
-    ;;
-  q)
-    exit_ifMissConf=true
     ;;
   \?)
     warn "Unknown option: -$OPTARG"

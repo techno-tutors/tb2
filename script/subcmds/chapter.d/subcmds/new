@@ -4,7 +4,6 @@
 #? Opts:
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
-#?   -q         Quiet mode (non-interactive)
 #? config dependencies: GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH, PROJECT_NAME
 
 set -euo pipefail
@@ -14,18 +13,13 @@ source "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
-exit_ifMissConf=false
-
-while getopts "b:c:q" opt; do
+while getopts "b:c:" opt; do
   case $opt in
   b)
     bookName="$OPTARG"
     ;;
   c)
     chapterName="$OPTARG"
-    ;;
-  q)
-    exit_ifMissConf=true
     ;;
   \?)
     warn "Unknown option: -$OPTARG"

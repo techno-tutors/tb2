@@ -5,7 +5,6 @@
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
 #?   -p         PAGENAME
-#?   -q         Quiet mode (non-interactive)
 #? config dependencies: MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 
 set -euo pipefail
@@ -16,7 +15,6 @@ source "$ROOT/utils.sh"
 bookName=""
 chapterName=""
 pageName=""
-exit_ifMissConf=false
 
 while getopts "b:c:p:q" opt; do
   case $opt in
@@ -28,9 +26,6 @@ while getopts "b:c:p:q" opt; do
     ;;
   p)
     pageName="$OPTARG"
-    ;;
-  q)
-    exit_ifMissConf=true
     ;;
   \?)
     warn "Unknown option: -$OPTARG"
