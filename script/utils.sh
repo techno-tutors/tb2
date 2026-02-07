@@ -22,7 +22,7 @@ function error() {
   printf "%b" "${RED}${BOLD}[-]${RESET} $1 \n"
 }
 function ask() {
-	printf "%b" "$(printf "%b" "${BOLD}${GREEN}[?]${RESET}$1\n\t${BOLD}${GREEN}>>${RESET}")"
+  printf "%b" "$(printf "%b" "${BOLD}${GREEN}[?]${RESET}$1\n\t${BOLD}${GREEN}>>${RESET}")"
   read -r answer
   echo "$answer"
 }
