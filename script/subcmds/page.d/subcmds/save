@@ -16,7 +16,7 @@ source "$ROOT/utils.sh"
 bookName=""
 chapterName=""
 pageName=""
-exit_missConf=false
+exit_ifMissConf=false
 
 while getopts "b:c:p:q" opt; do
   case $opt in
@@ -30,7 +30,7 @@ while getopts "b:c:p:q" opt; do
     pageName="$OPTARG"
     ;;
   q)
-    exit_missConf=true
+    exit_ifMissConf=true
     ;;
   \?)
     warn "Unknown option: -$OPTARG"
@@ -50,10 +50,10 @@ if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]] || [[ -z "${pageName}" ]]
 fi
 
 log "Checking for config..."
-checkConf "$exit_missConf" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH"
+
 useConf MDBOOK_SRC_DIR srcDir
 useConf TB2_OPERATION_BRANCH branch
-mustVar "$exit_missConf" "srcDir" "branch"
+
 log "done."
 
 pageFile="$srcDir/$bookName/$chapterName/$pageName.md"

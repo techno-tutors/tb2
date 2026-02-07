@@ -9,7 +9,7 @@ set -euo pipefail
 source "$ROOT/utils.sh"
 
 log "Checking for config..."
-checkConf true "MDBOOK_SRC_DIR" "PROJECT_NAME"
+
 useConf MDBOOK_SRC_DIR srcDir
 useConf PROJECT_NAME projectName
 log "done."

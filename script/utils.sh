@@ -47,7 +47,7 @@ function useConf() {
   local __resultvar="$2"
 
   local val
-  val=$(tb2 config get "$key" 2>/dev/null || true)
+  val=$("$ROOT/subcmds/config.d/config" get "$key" 2>/dev/null || true)
 
   if [[ -z "$val" ]]; then
     error "Config '$key' is not set."
@@ -99,7 +99,7 @@ function mdbook_chkAvailable() {
   # Check src directory exists
   info "Checking mdBook 'src' directory existence..."
   info "Looking for default source directory config"
-  checkConf true MDBOOK_SRC_DIR
+
   useConf MDBOOK_SRC_DIR srcdir
   if [[ -z "$srcdir" ]]; then
     info "No custom source directory configured. Using default 'src'."
@@ -198,7 +198,7 @@ function git_chkBranch() {
   if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo)" != "$branch" ]]; then
     log "Branch '$branch' is not current branch."
     log "Checking for branch existence..."
-    if git branch --list "$branch" >/dev/null 2>&1; then
+    if git show-ref --verify --quiet "refs/heads/$branch"; then
       log "Branch '$branch' exists."
     else
       log "Branch '$branch' does not exist."

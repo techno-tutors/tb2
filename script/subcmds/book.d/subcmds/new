@@ -11,14 +11,14 @@ set -euo pipefail
 source "$ROOT/utils.sh"
 
 bookName=""
-exit_missConf=false
+exit_ifMissConf=false
 while getopts "b:q" opt; do
   case $opt in
   b)
     bookName="$OPTARG"
     ;;
   q)
-    exit_missConf=true
+    exit_ifMissConf=true
     ;;
   \?)
     warn "Unknown option: -$OPTARG"
@@ -37,13 +37,13 @@ if [[ -z "${bookName}" ]]; then
 fi
 
 log "Checking for config..."
-checkConf "$exit_missConf" "MDBOOK_SERIES_NAME" "GH_OWNER_NAME" "MDBOOK_SRC_DIR" "TB2_OPERATION_BRANCH" "PROJECT_NAME"
+
 useConf MDBOOK_SERIES_NAME seriesName
 useConf GH_OWNER_NAME name
 useConf MDBOOK_SRC_DIR srcDir
 useConf TB2_OPERATION_BRANCH branch
 useConf PROJECT_NAME projectName
-mustVar "$exit_missConf" "seriesName" "name" "srcDir" "branch" "projectName"
+
 log "done."
 
 info "Creating new book Issue: $bookName"

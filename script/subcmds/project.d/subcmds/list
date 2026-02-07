@@ -26,9 +26,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 log "Checking for config..."
-checkConf true "MDBOOK_SRC_DIR"
+
 useConf MDBOOK_SRC_DIR srcDir
-mustVar true "srcDir"
+
 log "done."
 
 info "=Local [mdBooks project]="

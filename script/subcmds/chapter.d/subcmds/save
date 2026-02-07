@@ -14,7 +14,7 @@ source "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
-exit_missConf=false
+exit_ifMissConf=false
 
 while getopts "b:c:q" opt; do
   case $opt in
@@ -25,7 +25,7 @@ while getopts "b:c:q" opt; do
     chapterName="$OPTARG"
     ;;
   q)
-    exit_missConf=true
+    exit_ifMissConf=true
     ;;
   \?)
     warn "Unknown option: -$OPTARG"
@@ -45,10 +45,10 @@ if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
 fi
 
 log "Checking for config..."
-checkConf "$exit_missConf" "GH_OWNER_NAME" "TB2_OPERATION_BRANCH"
+
 useConf GH_OWNER_NAME name
 useConf TB2_OPERATION_BRANCH branch
-mustVar "$exit_missConf" "name" "branch"
+
 log "done."
 
 chapterBranch="chapter/$chapterName"

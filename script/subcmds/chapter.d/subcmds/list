@@ -29,10 +29,13 @@ while getopts "b:" opt; do
 done
 
 log "Checking for config..."
-checkConf true "MDBOOK_SRC_DIR" "PROJECT_NAME"
+if [[ -z "$bookName" ]]; then
+	error "-b option is required."
+	exit 1
+fi
 useConf MDBOOK_SRC_DIR srcDir
 useConf PROJECT_NAME projectName
-mustVar true "srcDir" "projectName"
+
 log "done."
 
 bookDir="$srcDir/$bookName"

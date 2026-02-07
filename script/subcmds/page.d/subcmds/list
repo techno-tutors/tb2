@@ -40,10 +40,10 @@ if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
 fi
 
 log "Checking for config..."
-checkConf true "MDBOOK_SRC_DIR" "PROJECT_NAME"
+
 useConf MDBOOK_SRC_DIR srcDir 
 useConf PROJECT_NAME projectName 
-mustVar true "srcDir" "projectName"
+
 log "done."
 
 chapterDir="$srcDir/$bookName/$chapterName"
