@@ -6,7 +6,7 @@ TB2 provides both interactive and command-line modes for efficient workflow.
 
 **TextBook ToolBox === TB2**
 
-now this is v1.
+Now, latest version is v1.
 
 ## Table of Contents
 - [About](#about)
