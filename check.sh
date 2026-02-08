@@ -2,11 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if git_root=$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null); then
-  ROOT="$git_root/script"
-else
-  ROOT="$SCRIPT_DIR/../script"
-fi
+ROOT="$SCRIPT_DIR/share/tb2"
 export ROOT
 
 if [ ! -f "$ROOT/utils.sh" ]; then
