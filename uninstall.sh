@@ -14,12 +14,16 @@ info() { printf "%b" "${BLUE}${BOLD}[*]${RESET} $1\n"; }
 warn() { printf "%b" "${YELLOW}${BOLD}[!]${RESET} $1\n"; }
 error() { printf "%b" "${RED}${BOLD}[-]${RESET} $1\n"; }
 ask() {
-	local __var="$1"
-	shift
-	printf "%b" "${BOLD}${GREEN}[?]${RESET} $*\n ${BOLD}${GREEN}>>${RESET} "
-	read -r answer
-	eval "$__var=\"$(printf "%s" "$answer")\""
+  local __var="$1"
+  shift
+  printf "%b" "${BOLD}${GREEN}[?]${RESET} $*\n ${BOLD}${GREEN}>>${RESET} "
+  if ! read -r answer </dev/tty; then
+    error "No interactive input available."
+    exit 1
+  fi
+  eval "$__var=\"$(printf "%s" "$answer")\""
 }
+
 catch() {
   if [ "$1" -ne 0 ]; then
     error "Command failed with exit code $1."
