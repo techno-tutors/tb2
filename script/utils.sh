@@ -46,7 +46,7 @@ run() {
   info "Running> $*"
   trap 'set -e' EXIT
   set +e
-  "$@"
+  eval "$*"
   catch $?
   set -e
   return $?

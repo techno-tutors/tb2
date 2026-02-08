@@ -37,7 +37,7 @@ run() {
   info "Running> $*"
   trap 'set -e' EXIT
   set +e
-  "$@"
+  eval "$*"
   catch $?
   set -e
   return $?
@@ -88,11 +88,11 @@ fi
 step 7 $TOTAL
 if [ "$choice" = "0" ]; then
   info "Preparing system-wide directories"
-  run sudo mkdir -p /usr/local/share/
+  run sudo mkdir -p /usr/local/share/tb2
   run sudo mkdir -p /usr/local/bin
 else
   info "Preparing user directories"
-  run mkdir -p ~/.local/share/
+  run mkdir -p ~/.local/share/tb2
   run mkdir -p ~/.local/bin
 fi
 
