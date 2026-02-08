@@ -6,45 +6,62 @@ on:
       - 'v*'
 
 jobs:
-  lint:
+  lint-and-test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install ShellCheck & shfmt
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y shellcheck shfmt
+          sudo apt-get install -y shellcheck shfmt devscripts bats
+          pip install bashate
 
-      - name: Run ShellCheck
+      - name: Run Checks
         run: |
-          shellcheck $(find . -type f -name "*.sh")
+          # 検査対象ファイルの抽出（scriptディレクトリ内）
+          FILES=$(find script -type f -name "*.sh")
+          if [ -z "$FILES" ]; then
+            echo "No .sh files found."
+            exit 0
+          fi
 
-      - name: Run shfmt (warnings only)
-        continue-on-error: true
-        run: |
-          echo "Running shfmt warnings (non-blocking)"
-          shfmt -i 2 -l .
+          echo "Running shfmt..."
+          shfmt -i 2 -ci -sr -d $FILES
 
-      - name: Run shfmt (strict diff)
-        run: shfmt -i 2 -d .
+          echo "Running bash -n..."
+          for f in $FILES; do bash -n "$f"; done
 
-      - name: Check strict mode (set -euo pipefail)
-        run: |
-          for f in $(find . -type f -name "*.sh"); do
-            if ! grep -Eq '^[^#]*set -euo pipefail' "$f"; then
+          echo "Running shellcheck..."
+          shellcheck --external-sources $FILES
+
+          echo "Running bashate..."
+          bashate -i E003,E006 --max-line-length 1000 $FILES
+
+          echo "Running checkbashisms..."
+          for f in $FILES; do checkbashisms --force "$f"; done
+
+          echo "Checking strict mode (set -euo pipefail)..."
+          for f in $FILES; do
+            if ! grep -Eq '^[[:space:]]*set -euo pipefail' "$f"; then
               echo "Strict mode missing in $f"
               exit 1
             fi
           done
 
-      - name: Check shebang
-        run: |
-          for f in $(find . -type f -name "*.sh"); do
-            first_line=$(head -n1 "$f")
+          echo "Checking shebang..."
+          for f in $FILES; do
+            read -r first_line < "$f"
             if [ "$first_line" != "#!/usr/bin/env bash" ]; then
               echo "Bad shebang in $f: $first_line"
               exit 1
             fi
           done
+
+      - name: Run Bats tests
+        run: |
+          if ls test/*.bats 1> /dev/null 2>&1; then
+            bats test
+          else
+            echo "No bats tests found."
+          fi
