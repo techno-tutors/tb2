@@ -58,7 +58,7 @@ else
   }
 fi
 log "done."
-ans=$(ask "Do you want to commit&push the repository now draft branch? (y/n)")
+ask ans "Do you want to commit&push the repository now draft branch? (y/n)"
 if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
   info "Exit."
   exit 0

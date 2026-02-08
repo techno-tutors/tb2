@@ -64,7 +64,7 @@ if gh_isManualMode;then
 	warn "this code uses gh issue list to get parent Book issue number."
 	info "but now tb2 is manual mode."
 	info "so please input directory, \"Book: $bookName\"'s issue number."
-	bookIssueNum=$(ask "number")
+	ask bookIssueNum "number"
 else
 	bookIssueNum=$(gh issue list --repo "$name/$repoName" --search "title:\"Book: $bookName\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
 fi
@@ -92,7 +92,7 @@ log "Creating GitHub issue for chapter..."
 run gh_createIssue "$name/$repoName" "Chapter: $chapterName" "$bookIssueBody"
 log "done."
 
-ans=$(ask "Do you want to commit&push the repository now chapter branch? (y/n)")
+ask ans "Do you want to commit&push the repository now chapter branch? (y/n)"
 if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
   info "Exit."
   exit 0

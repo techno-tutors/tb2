@@ -25,10 +25,12 @@ interactive_book() {
   log "  1) new  - Create new book"
   log "  2) list - List books"
 
-  sub=$(ask "book")
+  sub=""
+  ask sub "book"
   case "$sub" in
     "1" | "new")
-      name=$(ask "Book name")
+      name=""
+      ask name "Book name"
       "$ROOT/tb2" book new -b "$name"
       ;;
     "2" | "list")
@@ -46,20 +48,22 @@ interactive_chapter() {
   log "  2) save - Save chapter (PR)"
   log "  3) list - List chapters"
 
-  sub=$(ask "chapter")
+  ask sub "chapter"
   case "$sub" in
     "1" | "new")
-      book=$(ask "Book name")
-      chapter=$(ask "Chapter name")
+      book=""
+      chapter=""
+      ask book "Book name"
+      ask chapter "Chapter name"
       "$ROOT/tb2" chapter new -b "$book" -c "$chapter"
       ;;
     "2" | "save")
-      book=$(ask "Book name")
-      chapter=$(ask "Chapter name")
+      ask book "Book name"
+      ask chapter "Chapter name"
       "$ROOT/tb2" chapter save -b "$book" -c "$chapter"
       ;;
     "3" | "list")
-      book=$(ask "Book name")
+      ask book "Book name"
       "$ROOT/tb2" chapter list -b "$book"
       ;;
     *)
@@ -74,12 +78,12 @@ interactive_page() {
   log "  2) save - Save page"
   log "  3) list - List pages"
 
-  sub=$(ask "page")
+  ask sub "page"
   case "$sub" in
     "1" | "new")
-      book=$(ask "Book name")
-      chapter=$(ask "Chapter name")
-      page=$(ask "Page name? (empty for auto)")
+      ask book "Book name"
+      ask chapter "Chapter name"
+      ask page "Page name? (empty for auto)"
       if [ -z "$page" ]; then
         "$ROOT/tb2" page new -b "$book" -c "$chapter"
       else
@@ -87,14 +91,14 @@ interactive_page() {
       fi
       ;;
     "2" | "save")
-      book=$(ask "Book name")
-      chapter=$(ask "Chapter name")
-      page=$(ask "Page name")
+      ask book "Book name"
+      ask chapter "Chapter name"
+      ask page "Page name"
       "$ROOT/tb2" page save -b "$book" -c "$chapter" -p "$page"
       ;;
     "3" | "list")
-      book=$(ask "Book name")
-      chapter=$(ask "Chapter name")
+      ask book "Book name"
+      ask chapter "Chapter name"
       "$ROOT/tb2" page list -b "$book" -c "$chapter"
       ;;
     *)
@@ -108,7 +112,7 @@ interactive_project() {
   log "  1) list - Show books and chapters"
   log "  2) list with pages"
 
-  sub=$(ask "project")
+  ask sub "project"
   case "$sub" in
     "1" | "list")
       "$ROOT/tb2" project list

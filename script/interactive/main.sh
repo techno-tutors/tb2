@@ -13,7 +13,7 @@ log "#--------------------------------#"
 info "type help to see available commands."
 
 while true; do
-  cmd=$(ask "tb2?" | xargs)
+  ask cmd "tb2?" | xargs
   [ -z "$cmd" ] && continue
   case "$cmd" in
     "exit" | "quit")

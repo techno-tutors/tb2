@@ -23,9 +23,11 @@ error() {
   printf "%b" "${RED}${BOLD}[-]${RESET} $1 \n"
 }
 ask() {
-  printf "%b" "$(printf "%b" "${BOLD}${GREEN}[?]${RESET}$1\n\t${BOLD}${GREEN}>>${RESET}")"
+  local __var="$1"
+  shift
+  printf "%b" "${BOLD}${GREEN}[?]${RESET} $*\n ${BOLD}${GREEN}>>${RESET} "
   read -r answer
-  echo "$answer"
+  eval "$__var=\"$(printf "%s" "$answer")\""
 }
 catch() {
   if [ "$1" -ne 0 ]; then
@@ -205,7 +207,7 @@ git_chkBranch() {
       log "Branch '$branch' exists."
     else
       log "Branch '$branch' does not exist."
-      ans=$(ask "Create branch[c] or Exit[e]?")
+      ask ans "Create branch[c] or Exit[e]?"
       if [ "$ans" = "c" ] || [ "$ans" = "C" ]; then
         run git switch -c "$branch"
         log "done."

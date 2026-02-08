@@ -14,9 +14,11 @@ info() { printf "%b" "${BLUE}${BOLD}[*]${RESET} $1\n"; }
 warn() { printf "%b" "${YELLOW}${BOLD}[!]${RESET} $1\n"; }
 error() { printf "%b" "${RED}${BOLD}[-]${RESET} $1\n"; }
 ask() {
-  printf "%b" "${BOLD}${GREEN}[?]${RESET} $1\n  ${BOLD}${GREEN}>>${RESET} "
-  read -r answer
-  echo "$answer"
+	local __var="$1"
+	shift
+	printf "%b" "${BOLD}${GREEN}[?]${RESET} $*\n ${BOLD}${GREEN}>>${RESET} "
+	read -r answer
+	eval "$__var=\"$(printf "%s" "$answer")\""
 }
 catch() {
   if [ "$1" -ne 0 ]; then
@@ -47,7 +49,7 @@ step 1 $TOTAL
 info "Choose uninstall target"
 echo " 0) System-wide (/usr/local)"
 echo " 1) User install (~/.local)"
-choice=$(ask "Select 0 or 1")
+ask choice "Select 0 or 1"
 if [ "$choice" != "0" ] && [ "$choice" != "1" ]; then
   error "Invalid choice"
   exit 1
