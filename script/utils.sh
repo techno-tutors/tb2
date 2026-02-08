@@ -26,7 +26,7 @@ ask() {
   local __var="$1"
   shift
   printf "%b" "${BOLD}${GREEN}[?]${RESET} $*\n ${BOLD}${GREEN}>>${RESET} "
-  if ! read -r answer </dev/tty; then
+  if ! read -r answer < /dev/tty; then
     error "No interactive input available."
     exit 1
   fi
