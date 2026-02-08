@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT="$SCRIPT_DIR/share/tb2"
+ROOT="$SCRIPT_DIR/share/tb2/script"
 export ROOT
 
 if [ ! -f "$ROOT/utils.sh" ]; then
