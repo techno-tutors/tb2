@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$SCRIPT_DIR/../share/tb2/script"
 . "$ROOT/utils.sh"
 
-if ! mdbook_chkAvailable; then
+if ! [ "$1" = "config" ] && ! mdbook_chkAvailable; then
   warn "Exit.."
   exit 1
 fi
