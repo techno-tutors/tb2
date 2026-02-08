@@ -40,12 +40,12 @@ Choose one of the following three installation methods:
 
 ### Using cURL
 ```sh
-curl -fsSL https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | bash
 ```
 
 ### Using wget
 ```sh
-wget -qO- https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | sh
+wget -qO- https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | bash
 ```
 
 ## Uninstallation and Updation
