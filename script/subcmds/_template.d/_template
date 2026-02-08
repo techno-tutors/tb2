@@ -5,4 +5,4 @@
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"

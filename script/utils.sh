@@ -10,25 +10,25 @@ YELLOW="${ESC}33m"
 RED="${ESC}31m"
 GREEN="${ESC}32m"
 
-function log() {
+log() {
   printf "%b" "[+] $1\n"
 }
-function info() {
+info() {
   printf "%b" "${BLUE}${BOLD}[*]${RESET} $1 \n"
 }
-function warn() {
+warn() {
   printf "%b" "${YELLOW}${BOLD}[!]${RESET} $1 \n"
 }
-function error() {
+error() {
   printf "%b" "${RED}${BOLD}[-]${RESET} $1 \n"
 }
-function ask() {
+ask() {
   printf "%b" "$(printf "%b" "${BOLD}${GREEN}[?]${RESET}$1\n\t${BOLD}${GREEN}>>${RESET}")"
   read -r answer
   echo "$answer"
 }
-function catch() {
-  if [[ $1 -ne 0 ]]; then
+catch() {
+  if [ "$1" -ne 0 ]; then
     error "Command failed with exit code $1."
     return 2
   else
@@ -36,22 +36,23 @@ function catch() {
     return 0
   fi
 }
-function run() {
+run() {
   info "Running> $*"
-  trap 'set -e' RETURN
+  trap 'set -e' EXIT
   set +e
   "$@"
   catch $?
+  set -e
   return $?
 }
-function useConf() {
+useConf() {
   local key="$1"
   local __resultvar="$2"
 
   local val
-  val=$("$ROOT/subcmds/config.d/config" get "$key" 2>/dev/null || true)
+  val=$("$ROOT/subcmds/config.d/config" get "$key" 2> /dev/null || true)
 
-  if [[ -z "$val" ]]; then
+  if [ -z "$val" ]; then
     error "Config '$key' is not set."
     echo "Run: tb2 config set $key <value>"
     exit 1
@@ -59,42 +60,42 @@ function useConf() {
 
   eval "$__resultvar=\"\$val\""
 }
-function gh_isManualMode() {
+gh_isManualMode() {
   useConf GH_CLI_MODE mode
-  if [[ "$mode" == "manual" ]]; then
+  if [ "$mode" = "manual" ]; then
     return 0
   fi
   return 1
 }
-function gh_chkAvailable() {
+gh_chkAvailable() {
   if gh_isManualMode; then
     return 0
   fi
   # Check if gh is installed
   info "Checking GitHub CLI availability..."
-  if ! command -v gh >/dev/null 2>&1; then
+  if ! command -v gh > /dev/null 2>&1; then
     warn "GitHub CLI (gh) is not installed. Please install it from https://cli.github.com/ or your package manager."
     return 1
   fi
   # Check if user is logged in
   info "Checking GitHub CLI user auth status..."
-  if ! gh auth status >/dev/null 2>&1; then
+  if ! gh auth status > /dev/null 2>&1; then
     warn "You are not logged in to GitHub CLI. Please run 'gh auth login' first."
     return 1
   fi
   return 0
 }
-function mdbook_chkAvailable() {
+mdbook_chkAvailable() {
   # Check if mdbook is installed
   info "Checking mdBook availability..."
-  if ! command -v mdbook >/dev/null 2>&1; then
+  if ! command -v mdbook > /dev/null 2>&1; then
     warn "mdBook is not installed. Please install it from https://github.com/rust-lang/mdBook or your package manager."
     return 1
   fi
   # Check if we are in an mdBook project directory
   info "Checking if current directory is an mdBook project..."
   log "checking for book.toml file..."
-  if [[ ! -f book.toml ]]; then
+  if [ ! -f book.toml ]; then
     warn "This directory is not root of mdBook project. Please run this command in the root directory of your mdBook project."
     return 1
   fi
@@ -103,20 +104,20 @@ function mdbook_chkAvailable() {
   info "Looking for default source directory config"
 
   useConf MDBOOK_SRC_DIR srcdir
-  if [[ -z "$srcdir" ]]; then
+  if [ -z "$srcdir" ]; then
     info "No custom source directory configured. Using default 'src'."
     srcdir="src"
   else
     info "Using configured source directory: '$srcdir'"
   fi
-  if [[ ! -d "$srcdir" ]]; then
+  if [ ! -d "$srcdir" ]; then
     warn "mdBook '$srcdir' directory not found. Please ensure you are in a valid mdBook project directory."
     return 1
   fi
   info "mdBook project directory confirmed."
   return 0
 }
-function gh_createIssue() {
+gh_createIssue() {
   local repo="$1"
   local title="$2"
   local body="$3"
@@ -136,7 +137,7 @@ function gh_createIssue() {
 
   run gh issue create --repo "$repo" --title "$title" --body "$body"
 }
-function gh_createPR() {
+gh_createPR() {
   local repo="$1"
   local base="$2"
   local head="$3"
@@ -160,7 +161,7 @@ function gh_createPR() {
 
   run gh pr create --repo "$repo" --base "$base" --head "$head" --title "$title" --body "$body"
 }
-function gh_findIssue() {
+gh_findIssue() {
   local repo="$1"
   local search="$2"
 
@@ -177,10 +178,10 @@ function gh_findIssue() {
   gh issue list --repo "$repo" --search "$search" --json number,title \
     --jq '.[] | "\(.number): \(.title)"'
 }
-function s_gitCommit() {
+s_gitCommit() {
   local msg="$1"
 
-  if [[ -z $(git status --porcelain) ]]; then
+  if [ -z "$(git status --porcelain)" ]; then
     info "Nothing to commit."
     return
   fi
@@ -193,11 +194,11 @@ function s_gitCommit() {
 
   git push origin "$current"
 }
-function git_chkBranch() {
+git_chkBranch() {
   local branch=$1
   log "Using branch: $branch"
   log "Checking if exist of branch name..."
-  if [[ "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo)" != "$branch" ]]; then
+  if [ "$(git rev-parse --abbrev-ref HEAD 2> /dev/null || echo)" != "$branch" ]; then
     log "Branch '$branch' is not current branch."
     log "Checking for branch existence..."
     if git show-ref --verify --quiet "refs/heads/$branch"; then
@@ -205,7 +206,7 @@ function git_chkBranch() {
     else
       log "Branch '$branch' does not exist."
       ans=$(ask "Create branch[c] or Exit[e]?")
-      if [[ "$ans" == "c" || "$ans" == "C" ]]; then
+      if [ "$ans" = "c" ] || [ "$ans" = "C" ]; then
         run git switch -c "$branch"
         log "done."
       else

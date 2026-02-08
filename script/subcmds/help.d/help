@@ -6,7 +6,7 @@ set -euo pipefail
 
 subcmd_dir="$ROOT/subcmds"
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 info "tb2 - TextBook ToolBox"
 log "GitHub automation & textbook builder CLI"
@@ -24,9 +24,9 @@ echo
 info "SUBCOMMANDS"
 for dir in "$subcmd_dir"/*.d; do
   name=$(basename "$dir" | sed 's/\.d$//')
-  [[ "$name" == "_template" ]] && continue
+  [ "$name" = "_template" ] && continue
   main_cmd="$dir/$name"
-  if [[ -f "$main_cmd" ]]; then
+  if [ -f "$main_cmd" ]; then
     desc=$(grep '^#?' "$main_cmd" | sed 's/^#? //' | sed 's/^/      /')
   else
     desc="      (no description)"

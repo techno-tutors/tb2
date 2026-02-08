@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 #? Create a new page
-#? Usage: tb2 page new -c CHAPTERNAME -b BOOKNAME [-p PAGENAME] [-q]
+#? Usage: tb2 page new -c CHAPTERNAME -b BOOKNAME [-p PAGENAME] 
 #? Opts:
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
 #?   -p         PAGENAME (optional, auto-numbered if not specified)
-#? config dependencies: GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH, PROJECT_NAME
+#? config dependencies: GH_OWNER_NAME, GH_REPO_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
@@ -38,7 +38,7 @@ while getopts "b:c:p:" opt; do
   esac
 done
 
-if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
+if  -z "${bookName}" ] || [ -z "${chapterName}" ]; then
   warn "Both -b BOOKNAME and -c CHAPTERNAME are required."
   info "Exit."
   exit 1
@@ -47,9 +47,9 @@ fi
 log "Checking for config..."
 
 useConf GH_OWNER_NAME name 
+useConf GH_REPO_NAME repoName
 useConf MDBOOK_SRC_DIR srcDir 
 useConf TB2_OPERATION_BRANCH branch 
-useConf PROJECT_NAME projectName 
 
 log "done."
 
@@ -58,7 +58,7 @@ chapterDir="$srcDir/$bookName/$chapterName"
 info "Creating new page in chapter: $chapterName of book: $bookName"
 
 log "Checking if chapter directory exists..."
-if [[ ! -d "$chapterDir" ]]; then
+if [ ! -d "$chapterDir" ]; then
   error "Chapter directory '$chapterDir' does not exist."
   info "Exit."
   exit 1
@@ -66,10 +66,10 @@ fi
 log "done."
 
 # Auto-generate page name if not specified
-if [[ -z "$pageName" ]]; then
+if [ -z "$pageName" ]; then
   log "Auto-generating page name..."
   pageNum=1
-  while [[ -f "$chapterDir/p$pageNum.md" ]]; do
+  while [ -f "$chapterDir/p$pageNum.md" ]; do
     ((pageNum++))
   done
   pageName="p$pageNum"
@@ -79,7 +79,7 @@ fi
 pageFile="$chapterDir/$pageName.md"
 
 log "Checking if page file already exists..."
-if [[ -f "$pageFile" ]]; then
+if [ -f "$pageFile" ]; then
   warn "Page file '$pageFile' already exists. Skipping creation."
 else
   log "Creating page file '$pageFile'..."
@@ -88,8 +88,8 @@ else
 fi
 
 log "Searching for parent chapter Issue..."
-chapterIssueNum=$(gh issue list --repo "$projectName" --search "title:\"Chapter: $chapterName\" \"($bookName)\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
-if [[ -z "$chapterIssueNum" ]]; then
+chapterIssueNum=$(gh issue list --repo "$name/$repoName" --search "title:\"Chapter: $chapterName\" \"($bookName)\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
+if [ -z "$chapterIssueNum" ]; then
   warn "Could not find Chapter Issue for '$chapterName'. Continuing without link."
   pageIssueBody="Page '$pageName' in chapter '$chapterName' of book '$bookName'"
 else
@@ -98,7 +98,7 @@ else
 fi
 
 log "Creating GitHub issue for page..."
-run gh_createIssue "$projectName" "Page: $pageName ($chapterName)" "$pageIssueBody"
+run gh_createIssue "$name/$repoName" "Page: $pageName ($chapterName)" "$pageIssueBody"
 log "done."
 
 info "Page '$pageName' created successfully."

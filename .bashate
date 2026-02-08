@@ -1,0 +1,4 @@
+# .bashate
+ignore:
+  - E003
+max_line_length: 1000

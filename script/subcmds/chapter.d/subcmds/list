@@ -3,12 +3,12 @@
 #? Usage: tb2 chapter list -b BOOKNAME
 #? Opts:
 #?   -b         BOOKNAME
-#? config dependencies: MDBOOK_SRC_DIR
+#? config dependencies: MDBOOK_SRC_DIR, GH_OWNER_NAME, GH_REPO_NAME
 
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 bookName=""
 
@@ -29,13 +29,13 @@ while getopts "b:" opt; do
 done
 
 log "Checking for config..."
-if [[ -z "$bookName" ]]; then
+if [ -z "$bookName" ]; then
 	error "-b option is required."
 	exit 1
 fi
 useConf MDBOOK_SRC_DIR srcDir
-useConf PROJECT_NAME projectName
-
+useConf GH_OWNER_NAME name
+useConf GH_REPO_NAME repoName
 log "done."
 
 bookDir="$srcDir/$bookName"
@@ -49,7 +49,7 @@ shopt -u nullglob
 
 echo "=== Remote chapters ($bookName) ==="
 
-if ! issues=$(gh_findIssue "$projectName" "Chapter:.*\($bookName\)"); then
+if ! issues=$(gh_findIssue "$name/$repoName" "Chapter:.*\($bookName\)"); then
   echo "No remote chapters."
 else
   echo "$issues" | sed "s/^/- [$bookName] /"

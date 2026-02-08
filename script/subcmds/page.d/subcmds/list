@@ -4,12 +4,12 @@
 #? Opts:
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
-#? config dependencies: MDBOOK_SRC_DIR
+#? config dependencies: MDBOOK_SRC_DIR, GH_OWNER_NAME, GH_REPO_NAME
 
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
@@ -33,7 +33,7 @@ while getopts "b:c:" opt; do
   esac
 done
 
-if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
+if [ -z "${bookName}" ] || [ -z "${chapterName}" ]; then
   warn "Both -b BOOKNAME and -c CHAPTERNAME are required."
   info "Exit."
   exit 1
@@ -42,8 +42,8 @@ fi
 log "Checking for config..."
 
 useConf MDBOOK_SRC_DIR srcDir 
-useConf PROJECT_NAME projectName 
-
+useConf GH_OWNER_NAME name
+useConf GH_REPO_NAME repoName
 log "done."
 
 chapterDir="$srcDir/$bookName/$chapterName"
@@ -52,12 +52,12 @@ log "=========================="
 if gh_isManualMode; then
   info "Remote list is disabled in manual mode."
 else
-  run gh_findIssue "$projectName" "Page: .*($chapterName)"
+  run gh_findIssue "$name/$repoName" "Page: ($chapterName)"
 fi
 info "=Local [mdBook pages in $bookName/$chapterName]="
 log "=========================================="
 
-if [[ ! -d "$chapterDir" ]]; then
+if [ ! -d "$chapterDir" ]; then
   warn "Chapter directory '$chapterDir' does not exist."
   exit 1
 fi

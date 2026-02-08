@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #? Save a page (commit and push)
-#? Usage: tb2 page save -c CHAPTERNAME -b BOOKNAME -p PAGENAME [-q]
+#? Usage: tb2 page save -c CHAPTERNAME -b BOOKNAME -p PAGENAME
 #? Opts:
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
@@ -10,7 +10,7 @@
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
@@ -38,7 +38,7 @@ while getopts "b:c:p:" opt; do
   esac
 done
 
-if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]] || [[ -z "${pageName}" ]]; then
+if [ -z "${bookName}" ] || [ -z "${chapterName}" ] || [ -z "${pageName}" ]; then
   warn "Options -b BOOKNAME, -c CHAPTERNAME, and -p PAGENAME are all required."
   info "Exit."
   exit 1
@@ -56,7 +56,7 @@ pageFile="$srcDir/$bookName/$chapterName/$pageName.md"
 info "Saving page: $pageName in chapter: $chapterName of book: $bookName"
 
 log "Checking if page file exists..."
-if [[ ! -f "$pageFile" ]]; then
+if [ ! -f "$pageFile" ]; then
   error "Page file '$pageFile' does not exist."
   info "Exit."
   exit 1

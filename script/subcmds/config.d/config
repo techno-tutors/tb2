@@ -6,24 +6,23 @@
 #?   get KEY            Get a configuration value
 #? Keys:
 #?   GH_OWNER_NAME           GitHub owner/organization name
-#?   MDBOOK_SERIES_NAME      Default series name for books
+#?   GH_REPO_NAME						 GitHub repository name
 #?   MDBOOK_SRC_DIR          mdBook source directory
 #?   TB2_OPERATION_BRANCH    Branch name for operations
-#?   PROJECT_NAME            GitHub repository for Issue management (owner/repo)
 
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 CONFIG_FILE="$ROOT/subcmds/config.d/config.list"
 
-if [[ ! -f "$CONFIG_FILE" ]]; then
+if [ ! -f "$CONFIG_FILE" ]; then
   error "Config file not found: $CONFIG_FILE"
   echo
   exit 2
 fi
-source "$CONFIG_FILE"
+. "$CONFIG_FILE"
 
 getConf() {
   local key="$1"
@@ -31,17 +30,14 @@ getConf() {
   "GH_OWNER_NAME")
     echo "$GH_OWNER_NAME"
     ;;
-  "MDBOOK_SERIES_NAME")
-    echo "$MDBOOK_SERIES_NAME"
+	"GH_REPO_NAME")
+    echo "$GH_REPO_NAME"
     ;;
   "MDBOOK_SRC_DIR")
     echo "$MDBOOK_SRC_DIR"
     ;;
   "TB2_OPERATION_BRANCH")
     echo "$TB2_OPERATION_BRANCH"
-    ;;
-  "PROJECT_NAME")
-    echo "$PROJECT_NAME"
     ;;
 	"GH_CLI_MODE")
 	  echo "$GH_CLI_MODE"
@@ -57,7 +53,7 @@ setConf() {
   local key="$1"
   local value="$2"
 
-  if [[ ! -f "$CONFIG_FILE" ]]; then
+  if [ ! -f "$CONFIG_FILE" ]; then
     error "Config file not found: $CONFIG_FILE"
     echo
     exit 1
@@ -67,8 +63,8 @@ setConf() {
   "GH_OWNER_NAME")
     sed -i.bak "s|^GH_OWNER_NAME=.*$|GH_OWNER_NAME=\"$value\"|" "$CONFIG_FILE"
     ;;
-  "MDBOOK_SERIES_NAME")
-    sed -i.bak "s|^MDBOOK_SERIES_NAME=.*$|MDBOOK_SERIES_NAME=\"$value\"|" "$CONFIG_FILE"
+  "GH_REPO_NAME")
+    sed -i.bak "s|^GH_REPO_NAME=.*$|GH_REPO_NAME=\"$value\"|" "$CONFIG_FILE"
     ;;
   "MDBOOK_SRC_DIR")
     sed -i.bak "s|^MDBOOK_SRC_DIR=.*$|MDBOOK_SRC_DIR=\"$value\"|" "$CONFIG_FILE"
@@ -76,13 +72,9 @@ setConf() {
   "TB2_OPERATION_BRANCH")
     sed -i.bak "s|^TB2_OPERATION_BRANCH=.*$|TB2_OPERATION_BRANCH=\"$value\"|" "$CONFIG_FILE"
     ;;
-  "PROJECT_NAME")
-    sed -i.bak "s|^PROJECT_NAME=.*$|PROJECT_NAME=\"$value\"|" "$CONFIG_FILE"
-    ;;
 	"GH_CLI_MODE")
   	sed -i.bak "s|^GH_CLI_MODE=.*$|GH_CLI_MODE=\"$value\"|" "$CONFIG_FILE"
   	;;
-
   *)
     warn "Unknown key: $key"
     echo
@@ -93,7 +85,7 @@ setConf() {
 
 case "${1:-}" in
 get)
-  if [[ $# -lt 2 ]]; then
+  if [ $# -lt 2 ]; then
     error "Key required for 'get' subcommand"
     echo
     exit 1
@@ -101,7 +93,7 @@ get)
   getConf "$2"
   ;;
 set)
-  if [[ $# -lt 3 ]]; then
+  if [ $# -lt 3 ]; then
     error "Key and value required for 'set' subcommand"
     echo
     exit 1

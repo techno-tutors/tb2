@@ -8,7 +8,7 @@ else
 	dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/script"
   export ROOT="$dir"
 fi
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 if ! mdbook_chkAvailable; then
   warn "Exit.."
@@ -28,7 +28,7 @@ case "${1:-}" in
     "$ROOT/subcmds/help.d/help"
     ;;
   *)
-    if [[ ! -f "$ROOT/subcmds/$1.d/$1" ]] || [[ ! -x "$ROOT/subcmds/$1.d/$1" ]]; then
+    if [ ! -f "$ROOT/subcmds/$1.d/$1" ] || [ ! -x "$ROOT/subcmds/$1.d/$1" ]; then
       warn "Unknown subcommand: $1"
       info "Run '$0 --help' for usage."
       exit 1

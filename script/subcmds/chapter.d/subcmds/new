@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #? Create a new chapter
-#? Usage: tb2 chapter new -c CHAPTERNAME -b BOOKNAME [-q]
+#? Usage: tb2 chapter new -c CHAPTERNAME -b BOOKNAME 
 #? Opts:
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
-#? config dependencies: GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH, PROJECT_NAME
+#? config dependencies: GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
@@ -32,7 +32,7 @@ while getopts "b:c:" opt; do
   esac
 done
 
-if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
+if [ -z "${bookName}" ] || [ -z "${chapterName}" ]; then
   warn "Both -b BOOKNAME and -c CHAPTERNAME are required."
   info "Exit."
   exit 1
@@ -43,7 +43,6 @@ log "Checking for config..."
 useConf GH_OWNER_NAME name
 useConf MDBOOK_SRC_DIR srcDir
 useConf TB2_OPERATION_BRANCH branch
-useConf PROJECT_NAME projectName
 
 
 log "done."
@@ -53,7 +52,7 @@ chapterBranch="chapter/$chapterName"
 info "Creating new chapter: $chapterName in book: $bookName"
 
 log "Checking if book directory exists..."
-if [[ ! -d "$srcDir/$bookName" ]]; then
+if [ ! -d "$srcDir/$bookName" ]; then
   error "Book directory '$srcDir/$bookName' does not exist."
   info "Exit."
   exit 1
@@ -61,8 +60,15 @@ fi
 log "done."
 
 log "Searching for parent book Issue..."
-bookIssueNum=$(gh issue list --repo "$projectName" --search "title:\"Book: $bookName\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
-if [[ -z "$bookIssueNum" ]]; then
+if gh_isManualMode;then
+	warn "this code uses gh issue list to get parent Book issue number."
+	info "but now tb2 is manual mode."
+	info "so please input directory, \"Book: $bookName\"'s issue number."
+	bookIssueNum=$(ask "number")
+else
+	bookIssueNum=$(gh issue list --repo "$name/$repoName" --search "title:\"Book: $bookName\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
+fi
+if [ -z "$bookIssueNum" ]; then
   warn "Could not find Book Issue for '$bookName'. Continuing without link."
   bookIssueBody="Chapter '$chapterName' in book '$bookName'"
 else
@@ -74,7 +80,7 @@ git_chkBranch "$chapterBranch"
 
 log "Checking for local directory..."
 chapterDir="$srcDir/$bookName/$chapterName"
-if [[ -d "$chapterDir" ]]; then
+if [ -d "$chapterDir" ]; then
   warn "Directory '$chapterDir' already exists locally. Skipping mkdir."
 else
   log "Creating local directory '$chapterDir'..."
@@ -83,11 +89,11 @@ else
 fi
 
 log "Creating GitHub issue for chapter..."
-run gh_createIssue "$projectName" "Chapter: $chapterName" "$bookIssueBody"
+run gh_createIssue "$name/$repoName" "Chapter: $chapterName" "$bookIssueBody"
 log "done."
 
 ans=$(ask "Do you want to commit&push the repository now chapter branch? (y/n)")
-if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
+if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
   info "Exit."
   exit 0
 fi

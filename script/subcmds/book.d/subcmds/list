@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 #? List existing book both remote and local
 #? Usage: tb2 book list
-#? config dependencies: GH_OWNER_NAME, MDBOOK_SERIES_NAME, MDBOOK_SRC_DIR
+#? config dependencies:  MDBOOK_SRC_DIR
 
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 log "Checking for config..."
 
 useConf MDBOOK_SRC_DIR srcDir
-useConf PROJECT_NAME projectName
+useConf GH_OWNER_NAME name
+useConf GH_REPO_NAME repoName
+
 log "done."
 
 info "=Remote [GitHub Issues]="
@@ -19,7 +21,7 @@ log "=========================="
 if gh_isManualMode; then
   info "Remote list is disabled in manual mode."
 else
-  run gh_findIssue "$projectName" "Book:"
+  run gh_findIssue "$name/$repoName" "Book:"
 fi
 info "=Local [mdBook directory]="
 log "=========================="

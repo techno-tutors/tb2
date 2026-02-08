@@ -8,11 +8,11 @@
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 show_pages=false
 
-while [[ $# -gt 0 ]]; do
+while [ $# -gt 0 ]; do
   case "$1" in
   -p)
     show_pages=true
@@ -34,7 +34,7 @@ log "done."
 info "=Local [mdBooks project]="
 log "========================================"
 
-if [[ ! -d "$srcDir" ]]; then
+if [ ! -d "$srcDir" ]; then
   warn "Source directory '$srcDir' does not exist."
   info "No books found."
   exit 0
@@ -49,7 +49,7 @@ if ls -d "$srcDir"/*/ >/dev/null 2>&1; then
       find "$bookPath" -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -r -d '' chapterPath; do
         chapterName=$(basename "$chapterPath")
         log "  [chap]$chapterName"
-        if [[ "$show_pages" == true ]]; then
+        if [ "$show_pages" == true ]; then
   			  if ls "$chapterPath"/*.md >/dev/null 2>&1; then
   			    for pagePath in "$chapterPath"/*.md; do
   			      pageName=$(basename "$pagePath" .md)

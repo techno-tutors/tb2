@@ -3,11 +3,11 @@
 #? Usage: tb2 book new -b BOOKNAME
 #? Opts:
 #?   -b         BOOKNAME
-#? config dependencies: MDBOOK_SERIES_NAME, GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH, PROJECT_NAME
+#? config dependencies: GH_OWNER_NAME,GH_REPO_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 bookName=""
 while getopts "b:" opt; do
@@ -25,7 +25,7 @@ while getopts "b:" opt; do
     ;;
   esac
 done
-if [[ -z "${bookName}" ]]; then
+if [ -z "${bookName}" ]; then
   warn "Option -b requires an argument."
   info "Exit."
   exit 1
@@ -33,22 +33,21 @@ fi
 
 log "Checking for config..."
 
-useConf MDBOOK_SERIES_NAME seriesName
 useConf GH_OWNER_NAME name
+useConf GH_REPO_NAME repoName
 useConf MDBOOK_SRC_DIR srcDir
 useConf TB2_OPERATION_BRANCH branch
-useConf PROJECT_NAME projectName
 
 log "done."
 
 info "Creating new book Issue: $bookName"
-run gh_createIssue "$projectName" "Book: $bookName" "New book project '$bookName'"
+run gh_createIssue "$name/$repoName" "Book: $bookName" "New book project '$bookName'"
 log "done."
 log "Issue created on GitHub successfully."
 
 log "Checking for local directory..."
 
-if [[ -d "$srcDir/$bookName" ]]; then
+if [ -d "$srcDir/$bookName" ]; then
   warn "Directory '$srcDir/$bookName' already exists locally. Skipping mkdir."
 else
   log "Creating local directory '$srcDir/$bookName'..."
@@ -60,7 +59,7 @@ else
 fi
 log "done."
 ans=$(ask "Do you want to commit&push the repository now draft branch? (y/n)")
-if [[ "$ans" != "y" && "$ans" != "Y" ]]; then
+if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
   info "Exit."
   exit 0
 fi

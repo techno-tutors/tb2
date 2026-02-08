@@ -1,20 +1,23 @@
 #!/usr/bin/env bash
 #? Save a chapter (create pull request to draft branch)
-#? Usage: tb2 chapter save -c CHAPTERNAME -b BOOKNAME [-q]
+#? Usage: tb2 chapter save -c CHAPTERNAME -b BOOKNAME 
 #? Opts:
 #?   -c         CHAPTERNAME
-#? config dependencies: GH_OWNER_NAME, TB2_OPERATION_BRANCH, PROJECT_NAME
+#? config dependencies: GH_OWNER_NAME, TB2_OPERATION_BRANCH
 
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
 
-while getopts "c:" opt; do
+while getopts "c:b:" opt; do
   case $opt in
+	b)
+		bookName="$OPTARG"
+		;;
   c)
     chapterName="$OPTARG"
     ;;
@@ -29,7 +32,7 @@ while getopts "c:" opt; do
   esac
 done
 
-if [[ -z "${bookName}" ]] || [[ -z "${chapterName}" ]]; then
+if [ -z "${bookName}" ] || [ -z "${chapterName}" ]; then
   warn "Both -b BOOKNAME and -c CHAPTERNAME are required."
   info "Exit."
   exit 1
@@ -38,8 +41,8 @@ fi
 log "Checking for config..."
 
 useConf GH_OWNER_NAME name
+useConf GH_REPO_NAME repoName
 useConf TB2_OPERATION_BRANCH branch
-useConf PROJECT_NAME projectName
 
 log "done."
 
@@ -48,7 +51,7 @@ chapterBranch="chapter/$chapterName"
 info "Saving chapter: $chapterName in book: $bookName"
 log "Creating pull request from '$chapterBranch' to '$branch'..."
 
-run gh_createPR "$projectName" "$branch" "$chapterBranch"\
+run gh_createPR "$name/$repoName" "$branch" "$chapterBranch"\
   "Add chapter: $chapterName ($bookName)" \
   "This PR adds chapter $chapterName to book $bookName."
 log "done."

@@ -1,20 +1,15 @@
 # your github user name or organization name
-GH_OWNER_NAME=""
+GH_OWNER_NAME="techno-tutors"
 
-# default series name, this will be use for new book creation.
-# when you create new book, tb2 will create a github project "SERIESNAME/BOOKNAME".
-MDBOOK_SERIES_NAME=""
+# your github repository.
+GH_REPO_NAME="textbook"
 
-# default mdbook source directory(empty for use "src")
-MDBOOK_SRC_DIR=""
+# default mdbook source directory
+MDBOOK_SRC_DIR="src"
 
 # branch name for mdbook deployment by using tb2
-TB2_OPERATION_BRANCH=""
-
-# project name for GitHub Issue management (e.g., techno-tutors/textbook)
-# same as $GH_OWNER_NAME/(REPOSITORYNAME)
-# issues will be created in this repository
-PROJECT_NAME=""
+TB2_OPERATION_BRANCH="draft"
 
 # GitHub CLI usage mode: auto or manual
+# If you set to this opt manual, tb2 won't use gh to control GitHub automatically.
 GH_CLI_MODE="auto"

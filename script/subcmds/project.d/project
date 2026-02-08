@@ -7,7 +7,7 @@
 set -euo pipefail
 
 
-source "$ROOT/utils.sh"
+. "$ROOT/utils.sh"
 
 case "${1:-}" in
 "")
