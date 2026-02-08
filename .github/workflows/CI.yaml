@@ -27,7 +27,7 @@ jobs:
           fi
 
           echo "Running shfmt..."
-          shfmt -i 2 -ci -sr -d $FILES
+          shfmt -i 2 -ci -sr $FILES
 
           echo "Running bash -n..."
           for f in $FILES; do bash -n "$f"; done
