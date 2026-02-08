@@ -47,7 +47,7 @@ step() {
   printf "%b" "${BLUE}${BOLD}-----[ step $1/$2 ]----------------------------------------${RESET}\n"
 }
 
-TOTAL=10
+TOTAL=11
 
 step 1 $TOTAL
 info "Moving to temporary directory"
@@ -105,6 +105,11 @@ else
 fi
 
 step 9 $TOTAL
+info "Permission setting..."
+run sudo chmod -R a+rx /usr/local/share/tb2
+
+
+step 10 $TOTAL
 info "Creating symlink"
 if [ "$choice" = "0" ]; then
   run sudo ln -sf /usr/local/share/tb2/script/tb2 /usr/local/bin/tb2
@@ -112,6 +117,6 @@ else
   run ln -sf ~/.local/share/tb2/script/tb2 ~/.local/bin/tb2
 fi
 
-step 10 $TOTAL
+step 11 $TOTAL
 log "Installation complete."
 exit 0
