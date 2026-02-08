@@ -73,6 +73,8 @@ step 6 $TOTAL
 info "Selecting installation target"
 echo " 0) /usr/local/bin + /usr/local/share"
 echo " 1) ~/.local/bin + ~/.local/share"
+
+choice=""
 ask choice "Choose installation target (0 or 1)"
 if [ "$choice" != "0" ] && [ "$choice" != "1" ]; then
   error "Invalid choice"

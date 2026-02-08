@@ -49,6 +49,8 @@ step 1 $TOTAL
 info "Choose uninstall target"
 echo " 0) System-wide (/usr/local)"
 echo " 1) User install (~/.local)"
+
+choice=""
 ask choice "Select 0 or 1"
 if [ "$choice" != "0" ] && [ "$choice" != "1" ]; then
   error "Invalid choice"

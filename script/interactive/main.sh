@@ -13,6 +13,7 @@ log "#--------------------------------#"
 info "type help to see available commands."
 
 while true; do
+  cmd=""
   ask cmd "tb2?" | xargs
   [ -z "$cmd" ] && continue
   case "$cmd" in

@@ -207,6 +207,7 @@ git_chkBranch() {
       log "Branch '$branch' exists."
     else
       log "Branch '$branch' does not exist."
+      ans=""
       ask ans "Create branch[c] or Exit[e]?"
       if [ "$ans" = "c" ] || [ "$ans" = "C" ]; then
         run git switch -c "$branch"

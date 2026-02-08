@@ -48,6 +48,7 @@ interactive_chapter() {
   log "  2) save - Save chapter (PR)"
   log "  3) list - List chapters"
 
+  sub=""
   ask sub "chapter"
   case "$sub" in
     "1" | "new")
@@ -58,11 +59,14 @@ interactive_chapter() {
       "$ROOT/tb2" chapter new -b "$book" -c "$chapter"
       ;;
     "2" | "save")
+      book=""
+      chapter=""
       ask book "Book name"
       ask chapter "Chapter name"
       "$ROOT/tb2" chapter save -b "$book" -c "$chapter"
       ;;
     "3" | "list")
+      book=""
       ask book "Book name"
       "$ROOT/tb2" chapter list -b "$book"
       ;;
@@ -78,9 +82,13 @@ interactive_page() {
   log "  2) save - Save page"
   log "  3) list - List pages"
 
+  sub=""
   ask sub "page"
   case "$sub" in
     "1" | "new")
+      book=""
+      chapter=""
+      page=""
       ask book "Book name"
       ask chapter "Chapter name"
       ask page "Page name? (empty for auto)"
@@ -91,12 +99,17 @@ interactive_page() {
       fi
       ;;
     "2" | "save")
+      book=""
+      chapter=""
+      page=""
       ask book "Book name"
       ask chapter "Chapter name"
       ask page "Page name"
       "$ROOT/tb2" page save -b "$book" -c "$chapter" -p "$page"
       ;;
     "3" | "list")
+      book=""
+      chapter=""
       ask book "Book name"
       ask chapter "Chapter name"
       "$ROOT/tb2" page list -b "$book" -c "$chapter"
@@ -112,6 +125,7 @@ interactive_project() {
   log "  1) list - Show books and chapters"
   log "  2) list with pages"
 
+  sub=""
   ask sub "project"
   case "$sub" in
     "1" | "list")
