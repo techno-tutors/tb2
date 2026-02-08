@@ -69,6 +69,7 @@ if [ "$target" = "system" ]; then
   run sudo mkdir -p /usr/local/share/tb2
   run sudo cp -r ./* /usr/local/share/tb2/
   run sudo ln -sf /usr/local/share/tb2/script/tb2 /usr/local/bin/tb2
+	run sudo chmod -R a+rx /usr/local/share/tb2
 else
   run rm -rf ~/.local/share/tb2
   run mkdir -p ~/.local/share/tb2
