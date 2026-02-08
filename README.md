@@ -46,12 +46,8 @@ curl -fsSL https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/i
 wget -qO- https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | sh
 ```
 
-### Using Git (Not Recommended)
-```sh
-git clone https://github.com/techno-tutors/tb2.git
-cd tb2
-sh ./install.sh
-```
+## Uninstallation and Updation
+see [Install Section](#installation) and change file path "install.sh" to "update.sh" or "uninstall.sh".
 
 ## Prerequisites
 
