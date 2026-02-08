@@ -88,28 +88,28 @@ fi
 step 7 $TOTAL
 if [ "$choice" = "0" ]; then
   info "Preparing system-wide directories"
-  run sudo mkdir -p /usr/local/share/tb2
+  run sudo mkdir -p /usr/local/share/
   run sudo mkdir -p /usr/local/bin
 else
   info "Preparing user directories"
-  run mkdir -p ~/.local/share/tb2
+  run mkdir -p ~/.local/share/
   run mkdir -p ~/.local/bin
 fi
 
 step 8 $TOTAL
 info "Copying tb2 files"
 if [ "$choice" = "0" ]; then
-  run sudo cp -r script/* /usr/local/share/tb2/
+  run sudo cp -r ./* /usr/local/share/tb2/
 else
-  run cp -r script/* ~/.local/share/tb2/
+  run cp -r ./* ~/.local/share/tb2/
 fi
 
 step 9 $TOTAL
 info "Creating symlink"
 if [ "$choice" = "0" ]; then
-  run sudo ln -sf /usr/local/share/tb2/tb2 /usr/local/bin/tb2
+  run sudo ln -sf /usr/local/share/tb2/script/tb2 /usr/local/bin/tb2
 else
-  run ln -sf ~/.local/share/tb2/tb2 ~/.local/bin/tb2
+  run ln -sf ~/.local/share/tb2/script/tb2 ~/.local/bin/tb2
 fi
 
 step 10 $TOTAL

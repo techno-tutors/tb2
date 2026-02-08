@@ -67,13 +67,13 @@ info "Updating installation"
 if [ "$target" = "system" ]; then
   run sudo rm -rf /usr/local/share/tb2
   run sudo mkdir -p /usr/local/share/tb2
-  run sudo cp -r script/* /usr/local/share/tb2/
-  run sudo ln -sf /usr/local/share/tb2/tb2 /usr/local/bin/tb2
+  run sudo cp -r ./* /usr/local/share/tb2/
+  run sudo ln -sf /usr/local/share/tb2/script/tb2 /usr/local/bin/tb2
 else
   run rm -rf ~/.local/share/tb2
   run mkdir -p ~/.local/share/tb2
-  run cp -r script/* ~/.local/share/tb2/
-  run ln -sf ~/.local/share/tb2/tb2 ~/.local/bin/tb2
+  run cp -r ./* ~/.local/share/tb2/
+  run ln -sf ~/.local/share/tb2/script/tb2 ~/.local/bin/tb2
 fi
 
 step 6 $TOTAL
