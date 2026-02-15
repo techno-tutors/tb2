@@ -184,22 +184,6 @@ gh_findIssue() {
   gh issue list --repo "$repo" --search "$search" --json number,title \
     --jq '.[] | "\(.number): \(.title)"'
 }
-s_gitCommit() {
-  local msg="$1"
-
-  if [ -z "$(git status --porcelain)" ]; then
-    info "Nothing to commit."
-    return
-  fi
-
-  git add .
-  git commit -m "$msg"
-
-  current=$(git branch --show-current)
-  info "Pushing branch: $current"
-
-  git push origin "$current"
-}
 git_chkBranch() {
   local branch=$1
   log "Using branch: $branch"
