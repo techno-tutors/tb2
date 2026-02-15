@@ -66,7 +66,7 @@ useConf() {
 
   eval "$__resultvar=\"\$val\""
 }
-gh_isManualMode() {
+tb2_isManualMode() {
   useConf GH_CLI_MODE mode
   if [ "$mode" = "manual" ]; then
     return 0
@@ -74,7 +74,7 @@ gh_isManualMode() {
   return 1
 }
 gh_chkAvailable() {
-  if gh_isManualMode; then
+  if tb2_isManualMode; then
     return 0
   fi
   # Check if gh is installed
@@ -128,7 +128,7 @@ gh_createIssue() {
   local title="$2"
   local body="$3"
 
-  if gh_isManualMode; then
+  if tb2_isManualMode; then
     info "GitHub CLI manual mode is enabled."
     echo
     info "Please create the following GitHub Issue manually:"
@@ -150,7 +150,7 @@ gh_createPR() {
   local title="$4"
   local body="$5"
 
-  if gh_isManualMode; then
+  if tb2_isManualMode; then
     info "GitHub CLI manual mode is enabled."
     echo
     info "Please create the following Pull Request manually:"
@@ -171,7 +171,7 @@ gh_findIssue() {
   local repo="$1"
   local search="$2"
 
-  if gh_isManualMode; then
+  if tb2_isManualMode; then
     warn "Manual mode: cannot auto-search GitHub issues."
     echo ""
     echo "Please find issue manually in repository:"

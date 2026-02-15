@@ -64,7 +64,7 @@ else
 fi
 log "done."
 ans="$autoCommit";
-if ! gh_isManualMode; then
+if ! tb2_isManualMode; then
   ask ans "Do you want to commit&push the repository now draft branch? (y/n)"
 fi
 if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then

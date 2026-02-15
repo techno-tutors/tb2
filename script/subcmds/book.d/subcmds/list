@@ -18,7 +18,7 @@ log "done."
 
 log "=Remote [GitHub Issues]="
 log "=========================="
-if gh_isManualMode; then
+if tb2_isManualMode; then
   warn "Remote list is disabled in manual mode."
 else
   run gh_findIssue "$name/$repoName" "Book:"

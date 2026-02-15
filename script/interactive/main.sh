@@ -11,7 +11,7 @@ log "#--------------------------------#"
 log "#    TB2: TextBook ToolBox       #"
 log "#--------------------------------#"
 info "type help to see available commands."
-if gh_isManualMode; then
+if tb2_isManualMode; then
   warn "interactive mode is disabled when we are in manual mode"
 fi
 while true; do

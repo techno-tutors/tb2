@@ -48,7 +48,7 @@ if  [ -z "${bookName}" ] || [ -z "${chapterName}" ]; then
   log "Exit."
   exit 1
 fi
-if [ -z "${chapterIssueNum}"] && gh_isManualMode; then
+if [ -z "${chapterIssueNum}"] && tb2_isManualMode; then
   warn "-n is required in manual mode."
   log "Exit."
   exit 1

@@ -49,7 +49,7 @@ log "done."
 chapterDir="$srcDir/$bookName/$chapterName"
 info "=Remote [GitHub Issues]="
 log "=========================="
-if gh_isManualMode; then
+if tb2_isManualMode; then
   info "Remote list is disabled in manual mode."
 else
   run gh_findIssue "$name/$repoName" "Page: ($chapterName)"

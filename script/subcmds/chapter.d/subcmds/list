@@ -41,7 +41,7 @@ log "done."
 bookDir="$srcDir/$bookName"
 log "=Remote chapters ($bookName) ="
 log "=========================="
-if gh_isManualMode; then
+if tb2_isManualMode; then
   log "Remote list is disabled in manual mode."
 else
   if ! issues=$(gh_findIssue "$name/$repoName" "Chapter:.*\($bookName\)"); then
