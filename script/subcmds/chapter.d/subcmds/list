@@ -30,7 +30,7 @@ done
 
 log "Checking for config..."
 if [ -z "$bookName" ]; then
-	error "-b option is required."
+	warn "-b option is required."
 	exit 1
 fi
 useConf MDBOOK_SRC_DIR srcDir
@@ -39,19 +39,22 @@ useConf GH_REPO_NAME repoName
 log "done."
 
 bookDir="$srcDir/$bookName"
-echo "=== Local chapters ($bookName) ==="
-
+log "=Remote chapters ($bookName) ="
+log "=========================="
+if gh_isManualMode; then
+  log "Remote list is disabled in manual mode."
+else
+  if ! issues=$(gh_findIssue "$name/$repoName" "Chapter:.*\($bookName\)"); then
+    echo "No remote chapters."
+  else
+    echo "$issues" | sed "s/^/- [$bookName] /"
+  fi
+fi
+log "=Local chapters ($bookName)="
+log "=========================="
 shopt -s nullglob
 for d in "$bookDir"/*/; do
   echo "- [$bookName] $(basename "$d")"
 done
 shopt -u nullglob
-
-echo "=== Remote chapters ($bookName) ==="
-
-if ! issues=$(gh_findIssue "$name/$repoName" "Chapter:.*\($bookName\)"); then
-  echo "No remote chapters."
-else
-  echo "$issues" | sed "s/^/- [$bookName] /"
-fi
 exit 0

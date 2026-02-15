@@ -2,6 +2,7 @@
 #? Save a chapter (create pull request to draft branch)
 #? Usage: tb2 chapter save -c CHAPTERNAME -b BOOKNAME 
 #? Opts:
+#?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
 #? config dependencies: GH_OWNER_NAME, TB2_OPERATION_BRANCH
 
@@ -50,10 +51,9 @@ chapterBranch="chapter/$chapterName"
 
 info "Saving chapter: $chapterName in book: $bookName"
 log "Creating pull request from '$chapterBranch' to '$branch'..."
-
 run gh_createPR "$name/$repoName" "$branch" "$chapterBranch"\
   "Add chapter: $chapterName ($bookName)" \
   "This PR adds chapter $chapterName to book $bookName."
 log "done."
-info "Chapter '$chapterName' saved successfully."
+info "Chapter '$chapterName' saved."
 exit 0

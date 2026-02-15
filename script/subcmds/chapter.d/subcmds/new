@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 #? Create a new chapter
-#? Usage: tb2 chapter new -c CHAPTERNAME -b BOOKNAME 
+#? Usage: tb2 chapter new -c CHAPTERNAME -b BOOKNAME [-a] [-p]
 #? Opts:
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
+#?   -n         PARENT(book) ISSUE NUMBER
+#?   -a         auto commit flag
 #? config dependencies: GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 
 set -euo pipefail
@@ -13,13 +15,21 @@ set -euo pipefail
 
 bookName=""
 chapterName=""
-while getopts "b:c:" opt; do
+autoCommit="n"
+bookIssueNum=""
+while getopts "b:c:n:a" opt; do
   case $opt in
   b)
     bookName="$OPTARG"
     ;;
   c)
     chapterName="$OPTARG"
+    ;;
+  n)
+    bookIssueNum="$OPTARG"
+    ;;
+  a)
+    autoCommit="y"
     ;;
   \?)
     warn "Unknown option: -$OPTARG"
@@ -34,10 +44,14 @@ done
 
 if [ -z "${bookName}" ] || [ -z "${chapterName}" ]; then
   warn "Both -b BOOKNAME and -c CHAPTERNAME are required."
-  info "Exit."
+  log "Exit."
   exit 1
 fi
-
+if [ -z "${bookIssueNum}"] && gh_isManualMode; then
+  warn "-n is required in manual mode."
+  log "Exit."
+  exit 1
+fi
 log "Checking for config..."
 
 useConf GH_OWNER_NAME name
@@ -58,15 +72,8 @@ if [ ! -d "$srcDir/$bookName" ]; then
   exit 1
 fi
 log "done."
-
 log "Searching for parent book Issue..."
-if gh_isManualMode;then
-	warn "this code uses gh issue list to get parent Book issue number."
-	info "but now tb2 is manual mode."
-	info "so please input directory, \"Book: $bookName\"'s issue number."
-	bookIssueNum=""
-	ask bookIssueNum "number"
-else
+if ! gh_isManualMode; then
 	bookIssueNum=$(gh issue list --repo "$name/$repoName" --search "title:\"Book: $bookName\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
 fi
 if [ -z "$bookIssueNum" ]; then
@@ -93,17 +100,16 @@ log "Creating GitHub issue for chapter..."
 run gh_createIssue "$name/$repoName" "Chapter: $chapterName" "$bookIssueBody"
 log "done."
 
-ans=""
-ask ans "Do you want to commit&push the repository now chapter branch? (y/n)"
-if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
-  info "Exit."
-  exit 0
+ans="$autoCommit"
+if ! gh_isManualMode; then
+  ask ans "Do you want to commit&push the repository now chapter branch? (y/n)"
 fi
-
-log "Committing and pushing changes..."
-run git add "$chapterDir"
-run git commit -m "Create chapter $chapterName"
-run git push -u origin "$chapterBranch"
-log "done."
-info "New chapter '$chapterName' created successfully."
+if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
+  log "Committing and pushing changes..."
+  run git add "$chapterDir"
+  run git commit -m "Create chapter $chapterName"
+  run git push -u origin "$chapterBranch"
+  log "done."
+fi
+info "New chapter '$chapterName' created."
 exit 0

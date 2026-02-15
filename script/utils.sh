@@ -43,7 +43,7 @@ catch() {
   fi
 }
 run() {
-  info "Running> $*"
+  log "Running> $*"
   trap 'set -e' EXIT
   set +e
   eval "$*"

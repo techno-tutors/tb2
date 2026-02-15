@@ -5,6 +5,7 @@
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
 #?   -p         PAGENAME
+#?   -a         auto commit flag
 #? config dependencies: MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 
 set -euo pipefail
@@ -15,8 +16,9 @@ set -euo pipefail
 bookName=""
 chapterName=""
 pageName=""
+autoCommit="false"
 
-while getopts "b:c:p:" opt; do
+while getopts "b:c:p:a" opt; do
   case $opt in
   b)
     bookName="$OPTARG"
@@ -27,6 +29,8 @@ while getopts "b:c:p:" opt; do
   p)
     pageName="$OPTARG"
     ;;
+  a)
+    autoCommit="y"
   \?)
     warn "Unknown option: -$OPTARG"
     exit 1
@@ -62,16 +66,20 @@ if [ ! -f "$pageFile" ]; then
   exit 1
 fi
 log "done."
-chapterBranch="chapter/$chapterName"
-git_chkBranch "$chapterBranch"
-log "Committing and pushing page changes..."
-run git add "$pageFile"
-run git commit -m "Page: $pageName in $chapterName"
-log "done."
-
-log "Pushing changes..."
-run git push
-log "done."
-
-info "Page '$pageName' saved successfully."
+ans="$autoCommit"
+if ! gh_isManualMode; then
+  ask ans "Do you want to commit&push the repository now chapter branch? (y/n)"
+fi
+if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
+  chapterBranch="chapter/$chapterName"
+  git_chkBranch "$chapterBranch"
+  log "Committing and pushing page changes..."
+  run git add "$pageFile"
+  run git commit -m "Page: $pageName in $chapterName"
+  log "done."
+  log "Pushing changes..."
+  run git push
+  log "done."
+fi
+info "Page '$pageName' saved."
 exit 0

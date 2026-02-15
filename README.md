@@ -48,9 +48,6 @@ curl -fsSL https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/i
 wget -qO- https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | bash
 ```
 
-## Uninstallation and Updation
-see [Install Section](#installation) and change file path "install.sh" to "update.sh" or "uninstall.sh".
-
 ## Prerequisites
 
 TB2 requires the following tools:
@@ -82,40 +79,34 @@ tb2 config set GH_CLI_MODE "auto"
 
 ### Configuration Keys
 
-| Key                    | Description                          | Default    |
-| ---------------------- | ------------------------------------ | ---------- |
-| `GH_OWNER_NAME`        | GitHub username or organization      | (required) |
-| `GH_REPO_NAME`         | GitHub repository name               | (required) |
-| `MDBOOK_SRC_DIR`       | mdBook source directory              | `src`      |
-| `TB2_OPERATION_BRANCH` | Branch for operations                | `draft`    |
-| `GH_CLI_MODE`          | GitHub CLI mode (`auto` or `manual`) | `auto`     |
+Key Description Default
+`GH_OWNER_NAME` GitHub username or organization(required) `techno-tutors`
+`GH_REPO_NAME` GitHub repository name(required) `textbook`
+`MDBOOK_SRC_DIR` mdBook source directory `src`
+`TB2_OPERATION_BRANCH` Branch for operations `draft`
+`GH_CLI_MODE` GitHub CLI mode(`auto`||`manual`) `auto`
 
 ### Viewing Configuration
 
 ```sh
-# View a specific configuration value
-tb2 config get GH_OWNER_NAME
-
-# View all configurations
+tb2 config get KEYNAME
+# or
 cat script/subcmds/config.d/config.list
 ```
 
 ## Usage
 
-### Issue Hierarchy System
+### Issues
 
-TB2 uses GitHub Issues organized in a three-level hierarchy:
+TB2 uses GitHub Projects&Issues organized in a three-level:
 
 ```
+Series(GitHub Project)
+│
 Book (GitHub Issue)
-└── Chapter (GitHub Issue + Branch)
-    └── Page (GitHub Issue + File)
+└── Chapter (GitHub Issue[sub] + Branch)
+    └── Page (GitHub Issue[sub-sub] + .md)
 ```
-
-- **Book**: Top-level organization unit (creates Issue + directory)
-- **Chapter**: Section within a book (creates Issue + branch + directory)
-- **Page**: Individual content page (creates Issue + markdown file)
-
 ### Book Commands
 
 #### Create a new book
@@ -386,13 +377,13 @@ Issue #1: Book: Cryptography
     └── Issue #7: Page: Overview (EllipticCurves) (linked to #6)
 ```
 
-### Branch Structure
+### Branch Structure(example)
 
 - `draft` - Main operation branch (configured via `TB2_OPERATION_BRANCH`)
 - `chapter/RSA` - Chapter working branch
 - `chapter/EllipticCurves` - Another chapter working branch
 
-### Directory Structure
+### Directory Structure(example)
 
 ```
 src/
@@ -445,50 +436,10 @@ Permission to use, copy, modify, and/or distribute this software for any purpose
 - **Shebang**: Only `#!/usr/bin/env bash` is allowed
 - **Code Checks**: Run `./check.sh` before committing (requires `shfmt`, `shellcheck`, `shellharden`)
 
-### Directory Structure
-
-```
-/
-├── install.sh                          # Installation script
-├── script/
-│   ├── tb2                             # Main entry point
-│   ├── utils.sh                        # Utility functions
-│   ├── interactive/
-│   │   ├── main.sh                     # Interactive mode entry
-│   │   └── funcs.sh                    # Interactive mode functions
-│   └── subcmds/
-│       ├── config.d/
-│       │   ├── config                  # Config command
-│       │   └── config.list             # Config storage
-│       ├── book.d/
-│       │   ├── book                    # Book command dispatcher
-│       │   └── subcmds/
-│       │       ├── new                 # book new subcommand
-│       │       └── list                # book list subcommand
-│       ├── chapter.d/
-│       │   ├── chapter                 # Chapter command dispatcher
-│       │   └── subcmds/
-│       │       ├── new                 # chapter new
-│       │       ├── save                # chapter save
-│       │       └── list                # chapter list
-│       ├── page.d/
-│       │   ├── page                    # Page command dispatcher
-│       │   └── subcmds/
-│       │       ├── new                 # page new
-│       │       ├── save                # page save
-│       │       └── list                # page list
-│       ├── project.d/
-│       │   ├── project                 # Project command dispatcher
-│       │   └── subcmds/
-│       │       └── list                # project list
-│       └── help.d/
-│           └── help                    # Help command
-```
-
 ### Release Process
 
 - Tag commits with `v*` pattern for releases
-- Example: `git tag v1.0.0` then `git push --tags`
+- Example: `git tag v1` then `git push --tags`
 
 ### Contributors
 

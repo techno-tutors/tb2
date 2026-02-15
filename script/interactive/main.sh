@@ -11,7 +11,9 @@ log "#--------------------------------#"
 log "#    TB2: TextBook ToolBox       #"
 log "#--------------------------------#"
 info "type help to see available commands."
-
+if gh_isManualMode; then
+  warn "interactive mode is disabled when we are in manual mode"
+fi
 while true; do
   cmd=""
   ask cmd "tb2?" | xargs

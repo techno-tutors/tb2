@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 #? Create a new book project
-#? Usage: tb2 book new -b BOOKNAME
+#? Usage: tb2 book new -b BOOKNAME [-a]
 #? Opts:
 #?   -b         BOOKNAME
+#?   -a         auto commit flag
 #? config dependencies: GH_OWNER_NAME,GH_REPO_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 set -euo pipefail
 
@@ -10,10 +11,14 @@ set -euo pipefail
 . "$ROOT/utils.sh"
 
 bookName=""
-while getopts "b:" opt; do
+autoCommit="n"
+while getopts "b:a" opt; do
   case $opt in
   b)
     bookName="$OPTARG"
+    ;;
+  a)
+    autoCommit="y"
     ;;
   \?)
     warn "Unknown option: -$OPTARG"
@@ -27,7 +32,7 @@ while getopts "b:" opt; do
 done
 if [ -z "${bookName}" ]; then
   warn "Option -b requires an argument."
-  info "Exit."
+  log "Exit."
   exit 1
 fi
 
@@ -40,7 +45,7 @@ useConf TB2_OPERATION_BRANCH branch
 
 log "done."
 
-info "Creating new book Issue: $bookName"
+log "Creating new book Issue: $bookName"
 run gh_createIssue "$name/$repoName" "Book: $bookName" "New book project '$bookName'"
 log "done."
 log "Issue created on GitHub successfully."
@@ -58,16 +63,16 @@ else
   }
 fi
 log "done."
-ans=""
-ask ans "Do you want to commit&push the repository now draft branch? (y/n)"
-if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
-  info "Exit."
-  exit 0
+ans="$autoCommit";
+if ! gh_isManualMode; then
+  ask ans "Do you want to commit&push the repository now draft branch? (y/n)"
 fi
-git_chkBranch "$branch"
-run git add "$srcDir/$bookName"
-run git commit -m "Initial commit for book $bookName"
-run git push -u origin "$branch"
-log "done."
-info "New book project '$bookName' created successfully."
+if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
+  git_chkBranch "$branch"
+  run git add "$srcDir/$bookName"
+  run git commit -m "Initial commit for book $bookName"
+  run git push -u origin "$branch"
+  log "done."
+fi
+info "New book project '$bookName' created."
 exit 0

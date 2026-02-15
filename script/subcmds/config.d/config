@@ -54,8 +54,7 @@ setConf() {
   local value="$2"
 
   if [ ! -f "$CONFIG_FILE" ]; then
-    error "Config file not found: $CONFIG_FILE"
-    echo
+    warn "Config file not found: $CONFIG_FILE"
     exit 1
   fi
 
@@ -77,7 +76,6 @@ setConf() {
   	;;
   *)
     warn "Unknown key: $key"
-    echo
     return 1
     ;;
   esac
@@ -101,7 +99,7 @@ set)
   setConf "$2" "$3"
   ;;
 *)
-  error "Unknown subcommand: $1"
+  warn "Unknown subcommand: $1"
   echo
   exit 1
   ;;

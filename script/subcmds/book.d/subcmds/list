@@ -16,14 +16,14 @@ useConf GH_REPO_NAME repoName
 
 log "done."
 
-info "=Remote [GitHub Issues]="
+log "=Remote [GitHub Issues]="
 log "=========================="
 if gh_isManualMode; then
-  info "Remote list is disabled in manual mode."
+  warn "Remote list is disabled in manual mode."
 else
   run gh_findIssue "$name/$repoName" "Book:"
 fi
-info "=Local [mdBook directory]="
+log "=Local [mdBook directory]="
 log "=========================="
 find "${srcDir:-src}" -maxdepth 1 -mindepth 1 -type d -print0 | while IFS= read -r -d '' bookPath; do
 	bookPath=$(basename "$bookPath")

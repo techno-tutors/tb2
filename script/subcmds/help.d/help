@@ -9,16 +9,16 @@ subcmd_dir="$ROOT/subcmds"
 . "$ROOT/utils.sh"
 
 info "tb2 - TextBook ToolBox"
-log "GitHub automation & textbook builder CLI"
+info "GitHub automation & textbook builder CLI"
 echo
 
 info "USAGE"
-log "  tb2 <subcmd> [options]"
+info "  tb2 <subcmd> [options]"
 echo
 
 info "DESCRIPTION"
-log "  tb2 automates GitHub operations for textbook creation."
-log "  It manages Books, Chapters, Pages, Issues, Branches, and Projects."
+info "  tb2 automates GitHub operations for textbook creation."
+info "  It manages Books, Chapters, Pages, Issues, Branches, and Projects."
 echo
 
 info "SUBCOMMANDS"
@@ -37,10 +37,10 @@ done
 echo
 
 info "FLAGS"
-log "  -h, --help        Show help for a specific subcommand"
-log "  -i                Start tb2 in interactive mode"
+info "  -h, --help        Show help for a specific subcommand"
+info "  -i                Start tb2 in interactive mode"
 echo
 
 info "EXAMPLES"
-log "  see github.com/techno-tutors/tb2/"
+info "  see github.com/techno-tutors/tb2/"
 echo

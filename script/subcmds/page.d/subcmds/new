@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 #? Create a new page
-#? Usage: tb2 page new -c CHAPTERNAME -b BOOKNAME [-p PAGENAME] 
+#? Usage: tb2 page new -c CHAPTERNAME -b BOOKNAME [-p PAGENAME] [-n chapterIssueNum]
 #? Opts:
 #?   -b         BOOKNAME
 #?   -c         CHAPTERNAME
 #?   -p         PAGENAME (optional, auto-numbered if not specified)
+#?   -n         PARENT(chapter) ISSUE NUMBER
 #? config dependencies: GH_OWNER_NAME, GH_REPO_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 
 set -euo pipefail
-
 
 . "$ROOT/utils.sh"
 
 bookName=""
 chapterName=""
 pageName=""
+chapterIssueNum=""
 
-while getopts "b:c:p:" opt; do
+while getopts "b:c:p:n:" opt; do
   case $opt in
   b)
     bookName="$OPTARG"
@@ -27,40 +28,47 @@ while getopts "b:c:p:" opt; do
   p)
     pageName="$OPTARG"
     ;;
+  n)
+  	chapterIssueNum="$OPTARG"
   \?)
     warn "Unknown option: -$OPTARG"
+    log "Exit."
     exit 1
     ;;
   :)
     warn "Option -$OPTARG requires an argument."
+    log "Exit."
     exit 1
     ;;
   esac
 done
 
-if  -z "${bookName}" ] || [ -z "${chapterName}" ]; then
+if  [ -z "${bookName}" ] || [ -z "${chapterName}" ]; then
   warn "Both -b BOOKNAME and -c CHAPTERNAME are required."
-  info "Exit."
+  log "Exit."
+  exit 1
+fi
+if [ -z "${chapterIssueNum}"] && gh_isManualMode; then
+  warn "-n is required in manual mode."
+  log "Exit."
   exit 1
 fi
 
 log "Checking for config..."
 
-useConf GH_OWNER_NAME name 
+useConf GH_OWNER_NAME name
 useConf GH_REPO_NAME repoName
-useConf MDBOOK_SRC_DIR srcDir 
-useConf TB2_OPERATION_BRANCH branch 
+useConf MDBOOK_SRC_DIR srcDir
+useConf TB2_OPERATION_BRANCH branch
 
 log "done."
 
 chapterDir="$srcDir/$bookName/$chapterName"
-
-info "Creating new page in chapter: $chapterName of book: $bookName"
-
+log "Creating new page in chapter: $chapterName of book: $bookName"
 log "Checking if chapter directory exists..."
 if [ ! -d "$chapterDir" ]; then
   error "Chapter directory '$chapterDir' does not exist."
-  info "Exit."
+  log "Exit."
   exit 1
 fi
 log "done."
@@ -73,7 +81,7 @@ if [ -z "$pageName" ]; then
     ((pageNum++))
   done
   pageName="p$pageNum"
-  log "Generated page name: $pageName"
+  info "Generated page name: $pageName"
 fi
 
 pageFile="$chapterDir/$pageName.md"
@@ -86,9 +94,11 @@ else
   run touch "$pageFile"
   log "done."
 fi
-
+if 
 log "Searching for parent chapter Issue..."
-chapterIssueNum=$(gh issue list --repo "$name/$repoName" --search "title:\"Chapter: $chapterName\" \"($bookName)\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
+if [ -z "$chapterIssueNum" ]; then
+  chapterIssueNum=$(gh issue list --repo "$name/$repoName" --search "title:\"Chapter: $chapterName\" \"($bookName)\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
+fi
 if [ -z "$chapterIssueNum" ]; then
   warn "Could not find Chapter Issue for '$chapterName'. Continuing without link."
   pageIssueBody="Page '$pageName' in chapter '$chapterName' of book '$bookName'"

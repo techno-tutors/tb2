@@ -7,12 +7,12 @@ ROOT="$SCRIPT_DIR/../share/tb2/script"
 . "$ROOT/utils.sh"
 
 if ! [ "$1" = "config" ] && ! mdbook_chkAvailable; then
-  warn "Exit.."
+  log "Exit."
   exit 1
 fi
 
 if ! gh_chkAvailable; then
-  warn "Exit.."
+  log "Exit."
   exit 1
 fi
 
