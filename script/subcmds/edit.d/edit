@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+#? Open a page in the configured editor
+#? Usage: tb2 page edit -b BOOKNAME -c CHAPTERNAME -p PAGENAME
+#? Opts:
+#?   -b         BOOKNAME
+#?   -c         CHAPTERNAME
+#?   -p         PAGENAME (without .md)
+#? Env:
+#?   TB2_EDITOR, VISUAL, EDITOR  (checked in order)
+#? config dependencies: MDBOOK_SRC_DIR
+
+set -euo pipefail
+
+. "$ROOT/utils.sh"
+
+bookName=""
+chapterName=""
+pageName=""
+
+while getopts "b:c:p:" opt; do
+  case $opt in
+  b) bookName="$OPTARG" ;;
+  c) chapterName="$OPTARG" ;;
+  p) pageName="$OPTARG" ;;
+  \?)
+    warn "Unknown option: -$OPTARG"
+    exit 1
+    ;;
+  :)
+    warn "Option -$OPTARG requires an argument."
+    exit 1
+    ;;
+  esac
+done
+
+if [ -z "$bookName" ] || [ -z "$chapterName" ] || [ -z "$pageName" ]; then
+  warn "Options -b BOOKNAME, -c CHAPTERNAME, and -p PAGENAME are all required."
+  exit 1
+fi
+
+useConf MDBOOK_SRC_DIR srcDir
+
+projectRoot="${TB2_PROJECT_ROOT:-$(tb2_findRoot 2>/dev/null || pwd)}"
+pageFile="$projectRoot/$srcDir/$bookName/$chapterName/$pageName.md"
+
+if [ ! -f "$pageFile" ]; then
+  warn "Page file not found: $pageFile"
+  ans=""
+  ask ans "Create it now? (y/n)"
+  if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
+    tb2_applyTemplate "page" "$pageFile" "$bookName" "$chapterName" "$pageName"
+    success "Created: $pageFile"
+  else
+    info "Aborted."
+    exit 0
+  fi
+fi
+
+editor="$(tb2_getEditor)"
+
+if [ -z "$editor" ]; then
+  warn "No editor found. Set TB2_EDITOR, VISUAL, or EDITOR environment variable."
+  info "File is at: $pageFile"
+  exit 1
+fi
+
+info "Opening '$pageFile' with $editor ..."
+exec "$editor" "$pageFile"

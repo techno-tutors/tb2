@@ -1,37 +1,49 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+SELF="$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo "$0")"
+ROOT="$(cd "$(dirname "$SELF")" && pwd)"
 export ROOT
+
 . "$ROOT/utils.sh"
 
-if ! [ "$1" = "config" ] && ! [ "$1" = "update" ] && ! [ "$1" = "uninstall" ]; then
+NO_CHECK_CMDS="config update uninstall help"
+
+needs_check() {
+  local cmd="$1"
+  for nc in $NO_CHECK_CMDS; do
+    [ "$cmd" = "$nc" ] && return 1
+  done
+  return 0
+}
+
+CMD="${1:-}"
+
+if needs_check "$CMD"; then
   if ! mdbook_chkAvailable; then
-    warn "this directory is not in mdbook."
     log "Exit."
     exit 1
   fi
-  if ! gh_chkAvailable && tb2_isManualMode; then
-    warn "not installed gh. please install github cli or use manual mode."
+  if ! gh_chkAvailable; then
     log "Exit."
     exit 1
   fi
 fi
 
-case "${1:-}" in
-  ""|"-i")
-    "$ROOT/interactive/main.sh" "${@:2}"
-    ;;
-  "--help"|"-h")
-    "$ROOT/subcmds/help.d/help"
-    ;;
-  *)
-    if [ ! -f "$ROOT/subcmds/$1.d/$1" ] || [ ! -x "$ROOT/subcmds/$1.d/$1" ]; then
-      warn "Unknown subcommand: $1"
-      info "Run '$0 --help' for usage."
-      exit 1
-    fi
-    "$ROOT/subcmds/$1.d/$1" "${@:2}"
-    ;;
+case "$CMD" in
+"" | "-i")
+  "$ROOT/interactive/main.sh" "${@:2}"
+  ;;
+"--help" | "-h")
+  "$ROOT/subcmds/help.d/help"
+  ;;
+*)
+  subcmd_script="$ROOT/subcmds/$CMD.d/$CMD"
+  if [ ! -f "$subcmd_script" ] || [ ! -x "$subcmd_script" ]; then
+    warn "Unknown subcommand: $CMD"
+    info "Run 'tb2 --help' for usage."
+    exit 1
+  fi
+  "$subcmd_script" "${@:2}"
+  ;;
 esac
