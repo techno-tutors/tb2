@@ -1,270 +1,322 @@
 # tb2
 
-A simple toolbox bash script for textbook management using GitHub Issues and mdBook.
-This automates the creation and management of educational content through a three-level Issue hierarchy system.
-TB2 provides both interactive and command-line modes for efficient workflow.
+A command-line toolbox for textbook management using GitHub Issues and mdBook.
+TB2 automates the creation and management of educational content through a three-level Issue hierarchy, and works from any directory inside an mdBook project.
 
 **TextBook ToolBox === TB2**
 
-Now, latest version is v1.
+---
 
 ## Table of Contents
+
 - [About](#about)
+- [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Configuration](#configuration)
+- [Project Detection](#project-detection)
 - [Usage](#usage)
-  - [Issue Hierarchy System](#issue-hierarchy-system)
-  - [Book Commands](#book-commands)
-  - [Chapter Commands](#chapter-commands)
-  - [Page Commands](#page-commands)
-  - [Project Commands](#project-commands)
+  - [config](#config)
+  - [book](#book)
+  - [chapter](#chapter)
+  - [page](#page)
+  - [project](#project)
+  - [status](#status)
   - [Interactive Mode](#interactive-mode)
-- [Complete Workflow Example](#complete-workflow-example)
-- [GitHub Operations](#github-operations)
+- [Templates](#templates)
 - [Manual Mode](#manual-mode)
-- [License](#license)
+- [GitHub Integration](#github-integration)
+- [Update / Uninstall](#update--uninstall)
+- [Complete Workflow](#complete-workflow)
 - [Contributing](#contributing)
+- [License](#license)
+
+---
 
 ## About
 
-TB2 is a command-line tool that integrates GitHub Issues with mdBook projects, providing:
-- Hierarchical issue management (Book → Chapter → Page)
-- Automated branch creation and pull request workflows
-- Both CLI and interactive modes
-- Integration with GitHub CLI for seamless GitHub operations
-- Local mdBook project structure management
+TB2 integrates GitHub Issues with mdBook projects:
 
-## Installation
+- Hierarchical Issue management: Book → Chapter → Page
+- Automatic branch creation and pull request workflows
+- CLI and interactive modes
+- Template system for new content
+- Project-root auto-detection (run from any subdirectory)
+- Manual mode for environments without GitHub CLI
 
-Choose one of the following three installation methods:
+### Issue Hierarchy
 
-### Using cURL
-```sh
-curl -fsSL https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | bash
+```
+Series (GitHub Project, optional)
+│
+Book   (GitHub Issue:  "Book: NAME")
+└── Chapter (GitHub Issue: "Chapter: NAME (BOOK)" + branch chapter/NAME)
+    └── Page (GitHub Issue: "Page: NAME (CHAPTER)" + .md file)
 ```
 
-### Using wget
-```sh
-wget -qO- https://raw.githubusercontent.com/techno-tutors/tb2/refs/heads/main/install.sh | bash
-```
+---
 
 ## Prerequisites
 
-TB2 requires the following tools:
-- **mdBook**: Install from https://github.com/rust-lang/mdBook
-- **GitHub CLI (gh)**: Install from https://cli.github.com/ (not required in manual mode)
-- **Git**: Standard git installation
-- **Bash**: Version 4.0 or later
+| Tool | Required | Notes |
+|------|----------|-------|
+| bash ≥ 4.0 | Yes | |
+| git | Yes | |
+| mdBook | Yes | https://github.com/rust-lang/mdBook |
+| GitHub CLI (gh) | No | Required unless `GH_CLI_MODE=manual`. https://cli.github.com/ |
+
+---
+
+## Installation
+
+### curl
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/techno-tutors/tb2/main/install.sh | bash
+```
+
+### wget
+
+```sh
+wget -qO- https://raw.githubusercontent.com/techno-tutors/tb2/main/install.sh | bash
+```
+
+The installer will ask whether to install system-wide (`/usr/local`) or for the current user only (`~/.local`). The user install is recommended.
+
+If `~/.local/bin` is not in your PATH, add this to `~/.bashrc` or `~/.zshrc`:
+
+```sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+---
 
 ## Configuration
 
-Before using tb2, configure the following settings:
+```sh
+tb2 config set GH_OWNER_NAME  "your-github-username-or-org"
+tb2 config set GH_REPO_NAME   "your-repository-name"
+tb2 config set MDBOOK_SRC_DIR "src"
+tb2 config set TB2_OPERATION_BRANCH "draft"
+tb2 config set GH_CLI_MODE    "auto"   # or "manual"
+```
+
+### View all settings
 
 ```sh
-# Set your GitHub username or organization name
-tb2 config set GH_OWNER_NAME "YOUR_GITHUB_USERNAME"
+tb2 config list
+```
 
-# Set your GitHub repository name
-tb2 config set GH_REPO_NAME "YOUR_REPOSITORY_NAME"
+### Get a single value
 
-# Set the source directory for your mdBook content (default: "src")
-tb2 config set MDBOOK_SRC_DIR "src"
-
-# Set the branch name for operations (typically "draft")
-tb2 config set TB2_OPERATION_BRANCH "draft"
-
-# Set GitHub CLI mode: "auto" or "manual" (default: "auto")
-tb2 config set GH_CLI_MODE "auto"
+```sh
+tb2 config get GH_OWNER_NAME
 ```
 
 ### Configuration Keys
 
-Key Description Default
-`GH_OWNER_NAME` GitHub username or organization(required) `techno-tutors`
-`GH_REPO_NAME` GitHub repository name(required) `textbook`
-`MDBOOK_SRC_DIR` mdBook source directory `src`
-`TB2_OPERATION_BRANCH` Branch for operations `draft`
-`GH_CLI_MODE` GitHub CLI mode(`auto`||`manual`) `auto`
+| Key | Description | Default |
+|-----|-------------|---------|
+| `GH_OWNER_NAME` | GitHub username or organization | `techno-tutors` |
+| `GH_REPO_NAME` | GitHub repository name | `textbook` |
+| `MDBOOK_SRC_DIR` | mdBook source directory | `src` |
+| `TB2_OPERATION_BRANCH` | Base branch for operations | `draft` |
+| `GH_CLI_MODE` | `auto` (use gh CLI) or `manual` | `auto` |
 
-### Viewing Configuration
+---
+
+## Project Detection
+
+tb2 automatically finds your mdBook project root by walking up the directory tree looking for `book.toml`. This means you can run tb2 from any subdirectory of your project:
 
 ```sh
-tb2 config get KEYNAME
-# or
-cat script/subcmds/config.d/config.list
+cd src/Cryptography/RSA
+tb2 page list -b Cryptography -c RSA   # works fine
 ```
+
+---
 
 ## Usage
 
-### Issues
+### config
 
-TB2 uses GitHub Projects&Issues organized in a three-level:
+```sh
+tb2 config list
+tb2 config get KEY
+tb2 config set KEY VALUE
+```
 
-```
-Series(GitHub Project)
-│
-Book (GitHub Issue)
-└── Chapter (GitHub Issue[sub] + Branch)
-    └── Page (GitHub Issue[sub-sub] + .md)
-```
-### Book Commands
+---
+
+### book
 
 #### Create a new book
+
 ```sh
-tb2 book new -b BOOKNAME
+tb2 book new -b BOOKNAME [-a] [-t]
 ```
 
-**What it does:**
-- Creates a GitHub Issue titled "Book: BOOKNAME"
-- Creates a local directory at `MDBOOK_SRC_DIR/BOOKNAME`
-- Optionally commits and pushes to the operation branch
+| Flag | Description |
+|------|-------------|
+| `-b` | Book name (required) |
+| `-a` | Auto commit and push without prompt |
+| `-t` | Apply book template to `README.md` |
 
-**Example:**
 ```sh
-tb2 book new -b Cryptography
+tb2 book new -b Cryptography -t
 ```
 
-#### List all books
+#### List books
+
 ```sh
 tb2 book list
 ```
 
-**What it does:**
-- Lists remote books (GitHub Issues with "Book:" prefix)
-- Lists local book directories in `MDBOOK_SRC_DIR`
+Shows remote GitHub Issues and local directories.
 
-### Chapter Commands
+#### Build
+
+```sh
+tb2 book build [-b BOOKNAME] [--open] [--dest DIR]
+```
+
+Wraps `mdbook build`. `--open` launches the browser after build.
+
+#### Serve
+
+```sh
+tb2 book serve [--port PORT] [--hostname HOST] [--open]
+```
+
+Wraps `mdbook serve`.
+
+---
+
+### chapter
 
 #### Create a new chapter
+
 ```sh
-tb2 chapter new -b BOOKNAME -c CHAPTERNAME
+tb2 chapter new -b BOOKNAME -c CHAPTERNAME [-n ISSUE_NUM] [-a] [-t]
 ```
 
-**What it does:**
-- Creates a GitHub Issue titled "Chapter: CHAPTERNAME" linked to parent Book Issue
-- Creates a new branch `chapter/CHAPTERNAME` from the operation branch
-- Creates a local directory at `MDBOOK_SRC_DIR/BOOKNAME/CHAPTERNAME`
-- Optionally commits and pushes to the chapter branch
+| Flag | Description |
+|------|-------------|
+| `-b` | Book name (required) |
+| `-c` | Chapter name (required) |
+| `-n` | Parent Book Issue number (required in manual mode) |
+| `-a` | Auto commit and push |
+| `-t` | Apply chapter template to `intro.md` |
 
-**Example:**
-```sh
-tb2 chapter new -b Cryptography -c RSA
-```
+Creates branch `chapter/CHAPTERNAME` and a GitHub Issue linked to the parent Book Issue.
 
 #### Save chapter (create pull request)
+
 ```sh
-tb2 chapter save -b BOOKNAME -c CHAPTERNAME
+tb2 chapter save -b BOOKNAME -c CHAPTERNAME [--close-issue]
 ```
 
-**What it does:**
-- Creates a pull request from `chapter/CHAPTERNAME` to the operation branch
-- Pull request title: "Add chapter: CHAPTERNAME (BOOKNAME)"
+Creates a PR from `chapter/CHAPTERNAME` → `TB2_OPERATION_BRANCH`. If a PR already exists, the command skips creation. `--close-issue` closes the Chapter Issue after PR creation.
 
-**Example:**
-```sh
-tb2 chapter save -b Cryptography -c RSA
-```
+#### List chapters
 
-#### List chapters in a book
 ```sh
 tb2 chapter list -b BOOKNAME
 ```
 
-**What it does:**
-- Lists local chapters (subdirectories in book directory)
-- Lists remote chapters (GitHub Issues with "Chapter:" prefix for the book)
+---
 
-**Example:**
-```sh
-tb2 chapter list -b Cryptography
-```
-
-### Page Commands
+### page
 
 #### Create a new page
+
 ```sh
-tb2 page new -b BOOKNAME -c CHAPTERNAME [-p PAGENAME]
+tb2 page new -b BOOKNAME -c CHAPTERNAME [-p PAGENAME] [-n ISSUE_NUM] [-t]
 ```
 
-**What it does:**
-- Creates a GitHub Issue titled "Page: PAGENAME (CHAPTERNAME)" linked to parent Chapter Issue
-- Creates a markdown file at `MDBOOK_SRC_DIR/BOOKNAME/CHAPTERNAME/PAGENAME.md`
-- If `-p` is omitted, auto-generates page names as `p1`, `p2`, `p3`, etc.
+| Flag | Description |
+|------|-------------|
+| `-b` | Book name (required) |
+| `-c` | Chapter name (required) |
+| `-p` | Page name without `.md` (auto-numbered `p1`, `p2`... if omitted) |
+| `-n` | Parent Chapter Issue number (required in manual mode) |
+| `-t` | Apply page template |
 
-**Examples:**
+#### Edit a page
+
 ```sh
-# With explicit page name
-tb2 page new -b Cryptography -c RSA -p Introduction
-
-# Auto-numbered page
-tb2 page new -b Cryptography -c RSA
-# Creates p1.md, p2.md, etc.
+tb2 page edit -b BOOKNAME -c CHAPTERNAME -p PAGENAME
 ```
 
-#### Save page changes
+Opens the page in your preferred editor. Editor resolution order: `$TB2_EDITOR` → `$VISUAL` → `$EDITOR` → first of `nvim`, `vim`, `nano`, `vi` found in PATH.
+
+If the page does not exist, you are prompted to create it (with template if configured).
+
 ```sh
-tb2 page save -b BOOKNAME -c CHAPTERNAME -p PAGENAME
+TB2_EDITOR=code tb2 page edit -b Cryptography -c RSA -p Introduction
 ```
 
-**What it does:**
-- Commits the page file with message "Page: PAGENAME in CHAPTERNAME"
-- Pushes changes to the current chapter branch
+#### Save a page
 
-**Example:**
 ```sh
-tb2 page save -b Cryptography -c RSA -p Introduction
+tb2 page save -b BOOKNAME -c CHAPTERNAME -p PAGENAME [-a]
 ```
 
-**Note:** Use `-p Introduction`, not `-p Introduction.md`
+Commits and pushes the page file to the current chapter branch. `-a` skips the confirmation prompt.
 
-#### List pages in a chapter
+#### List pages
+
 ```sh
 tb2 page list -b BOOKNAME -c CHAPTERNAME
 ```
 
-**What it does:**
-- Lists remote pages (GitHub Issues with "Page:" prefix for the chapter)
-- Lists local pages (markdown files in the chapter directory)
+Shows remote Issues and local `.md` files with line and byte counts.
 
-**Example:**
+---
+
+### project
+
 ```sh
-tb2 page list -b Cryptography -c RSA
+tb2 project list [-p]
 ```
 
-### Project Commands
+`-p` includes pages in the output.
 
-#### List project structure
-```sh
-tb2 project list
 ```
-
-**What it does:**
-- Displays all books and their chapters in tree structure
-
-#### List project structure with pages
-```sh
-tb2 project list -p
-```
-
-**What it does:**
-- Displays complete hierarchy: books, chapters, and pages
-
-**Example output:**
-```
-=Local [mdBooks project]=
+=Local [mdBook project]=
 ========================================
-[bok]Cryptography
-  [chap]RSA
-    [pag]Introduction
-    [pag]KeyGeneration
-  [chap]EllipticCurves
-    [pag]Overview
+[bok] Cryptography
+  [chap] RSA
+    [pag] Introduction
+    [pag] KeyGeneration
+  [chap] EllipticCurves
+    [pag] Overview
 ========================================
 ```
+
+---
+
+### status
+
+```sh
+tb2 status [-b BOOKNAME] [--remote]
+```
+
+Reports:
+- Page counts per book and chapter
+- Empty or stub pages (0 bytes or fewer than 3 lines)
+- Books missing a `README.md` / `intro.md` / `index.md`
+- Empty chapter directories (no `.md` files)
+- With `--remote`: open GitHub Issues and open Pull Requests
+
+```sh
+tb2 status
+tb2 status -b Cryptography
+tb2 status --remote
+```
+
+---
 
 ### Interactive Mode
-
-Launch the interactive mode for a guided workflow:
 
 ```sh
 tb2
@@ -272,174 +324,158 @@ tb2
 tb2 -i
 ```
 
-**Available commands in interactive mode:**
-- `book` - Book management menu
-- `chapter` - Chapter management menu
-- `page` - Page management menu
-- `project` - Project view menu
-- `help` - Show help
-- `exit` or `quit` - Exit interactive mode
-
-The interactive mode provides numbered menus for each operation and prompts for required inputs.
-
-## Complete Workflow Example
-
-Here's a complete example of creating a cryptography textbook:
-
-### 1. Initial Setup
-
-```sh
-# Configure TB2
-tb2 config set GH_OWNER_NAME "techno-tutors"
-tb2 config set GH_REPO_NAME "textbook"
-tb2 config set MDBOOK_SRC_DIR "src"
-tb2 config set TB2_OPERATION_BRANCH "draft"
-```
-
-### 2. Create a Book
-
-```sh
-tb2 book new -b Cryptography
-# Creates:
-# - GitHub Issue: "Book: Cryptography"
-# - Directory: src/Cryptography/
-```
-
-### 3. Create a Chapter
-
-```sh
-tb2 chapter new -b Cryptography -c RSA
-# Creates:
-# - GitHub Issue: "Chapter: RSA" (linked to Book Issue)
-# - Branch: chapter/RSA
-# - Directory: src/Cryptography/RSA/
-```
-
-### 4. Create Pages
-
-```sh
-# Create first page with explicit name
-tb2 page new -b Cryptography -c RSA -p Introduction
-# Creates:
-# - GitHub Issue: "Page: Introduction (RSA)"
-# - File: src/Cryptography/RSA/Introduction.md
-
-# Create additional pages (auto-numbered)
-tb2 page new -b Cryptography -c RSA
-# Creates: src/Cryptography/RSA/p1.md
-
-tb2 page new -b Cryptography -c RSA
-# Creates: src/Cryptography/RSA/p2.md
-```
-
-### 5. Edit Content
-
-```sh
-# Edit your markdown files
-nano src/Cryptography/RSA/Introduction.md
-# Write your content...
-```
-
-### 6. Save Page Changes
-
-```sh
-tb2 page save -b Cryptography -c RSA -p Introduction
-# Commits and pushes to branch chapter/RSA
-```
-
-### 7. Complete the Chapter
-
-```sh
-tb2 chapter save -b Cryptography -c RSA
-# Creates pull request from chapter/RSA to draft branch
-```
-
-### 8. Review Progress
-
-```sh
-tb2 project list -p
-# Displays complete project hierarchy
-```
-
-## GitHub Operations
-
-### Issue Hierarchy Example
-
-After completing the workflow above, your GitHub repository will have:
+Numbered menus guide you through all operations. Available commands in interactive mode:
 
 ```
-Issue #1: Book: Cryptography
-├── Issue #2: Chapter: RSA (linked to #1)
-│   ├── Issue #3: Page: Introduction (RSA) (linked to #2)
-│   ├── Issue #4: Page: p1 (RSA) (linked to #2)
-│   └── Issue #5: Page: p2 (RSA) (linked to #2)
-└── Issue #6: Chapter: EllipticCurves (linked to #1)
-    └── Issue #7: Page: Overview (EllipticCurves) (linked to #6)
+book      chapter      page      project
+status    update       uninstall help      exit
 ```
 
-### Branch Structure(example)
+---
 
-- `draft` - Main operation branch (configured via `TB2_OPERATION_BRANCH`)
-- `chapter/RSA` - Chapter working branch
-- `chapter/EllipticCurves` - Another chapter working branch
+## Templates
 
-### Directory Structure(example)
+Templates are stored in `script/subcmds/config.d/templates/`. Edit them to match your project style.
 
-```
-src/
-└── Cryptography/
-    ├── RSA/
-    │   ├── Introduction.md
-    │   ├── p1.md
-    │   └── p2.md
-    └── EllipticCurves/
-        └── Overview.md
-```
+| File | Used by |
+|------|---------|
+| `book.md` | `tb2 book new -t` → `README.md` |
+| `chapter.md` | `tb2 chapter new -t` → `intro.md` |
+| `page.md` | `tb2 page new -t` or `tb2 page edit` (new file) |
+
+Available template variables:
+
+| Variable | Value |
+|----------|-------|
+| `{{BOOK_NAME}}` | Book name |
+| `{{CHAPTER_NAME}}` | Chapter name |
+| `{{PAGE_NAME}}` | Page name |
+| `{{DATE}}` | Current date (`YYYY-MM-DD`) |
+
+---
 
 ## Manual Mode
 
-TB2 can operate without GitHub CLI by using manual mode:
+For environments without GitHub CLI, or if you prefer manual control:
 
 ```sh
 tb2 config set GH_CLI_MODE "manual"
 ```
 
-In manual mode:
-- TB2 will display instructions for manual GitHub operations
-- You create Issues and PRs manually through GitHub's web interface
-- Local file operations continue to work normally
-- `book list`, `chapter list`, and `page list` won't show remote Issues
+In manual mode, all GitHub operations (Issue creation, PR creation, branch operations via `gh`) are replaced with printed instructions. Local file and git operations continue to work.
 
-This is useful when:
-- GitHub CLI is not available
-- You prefer manual control over GitHub operations
-- You're working in a restricted environment
+```
+[MANUAL] Create the following GitHub Issue:
+  Repo:  your-org/textbook
+  Title: Chapter: RSA (Cryptography)
+  Body:  Chapter 'RSA' in book 'Cryptography'. Parent: #3
+```
 
-## License
+Commands that require `-n` (Issue number) become mandatory in manual mode, because automatic Issue lookup via `gh` is disabled.
 
-ISC License (essentially equivalent to MIT License)
+---
 
-Copyright (c) 2026 Contributors in Techno-Tutors
+## GitHub Integration
 
-Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+tb2 uses `gh` for:
+
+| Action | Command triggered |
+|--------|-----------------|
+| Create Issue (book/chapter/page) | `gh issue create` |
+| Create Pull Request | `gh pr create` |
+| List Issues | `gh issue list` |
+| Close Issue | `gh issue close` |
+| Check duplicate PR | `gh pr list` |
+| Lookup parent Issue number | `gh issue list --json number` |
+
+### Duplicate PR guard
+
+`chapter save` checks whether a PR from the same head branch already exists before creating a new one. If it does, the command exits cleanly without error.
+
+### Issue linking
+
+Each level automatically links to its parent:
+- Chapter Issue body includes `Parent: #BOOK_ISSUE`
+- Page Issue body includes `Parent: #CHAPTER_ISSUE`
+
+When parent Issues cannot be found automatically (e.g. in manual mode), tb2 continues without the link and shows a warning.
+
+### Closing Issues
+
+`chapter save --close-issue` closes the Chapter Issue with a comment after PR creation.
+
+---
+
+## Update / Uninstall
+
+### Update
+
+```sh
+tb2 update
+```
+
+Pulls the latest version from GitHub, preserving your `config.list` settings.
+
+### Uninstall
+
+```sh
+tb2 uninstall
+```
+
+Removes the installation directory and the `tb2` symlink.
+
+---
+
+## Complete Workflow
+
+```sh
+# 1. Configure
+tb2 config set GH_OWNER_NAME "my-org"
+tb2 config set GH_REPO_NAME  "textbook"
+
+# 2. Create a book
+tb2 book new -b Cryptography -t
+
+# 3. Create a chapter
+tb2 chapter new -b Cryptography -c RSA -t
+
+# 4. Create and edit pages
+tb2 page new -b Cryptography -c RSA -p Introduction -t
+tb2 page edit -b Cryptography -c RSA -p Introduction
+
+# 5. Save the page
+tb2 page save -b Cryptography -c RSA -p Introduction
+
+# 6. Create PR for the chapter
+tb2 chapter save -b Cryptography -c RSA --close-issue
+
+# 7. Build and preview
+tb2 book build --open
+
+# 8. Check status
+tb2 status --remote
+```
+
+---
 
 ## Contributing
 
-### Guidelines
+- **Branch**: `main` only
+- **Commit messages**: short, descriptive English
+- **Language**: Bash only
+- **Indentation**: 2 spaces, no tabs
+- **Strict mode**: all scripts must include `set -euo pipefail`
+- **Shebang**: `#!/usr/bin/env bash` only
+- **Checks**: run `./check.sh` before committing
 
-- **Branch**: Only `main` branch
-- **Commit Messages**: Short, descriptive English
-- **Code Language**: Bash only
-- **External Commands**: Minimize use of external commands when possible
-- **Indentation**: 2 spaces (no tabs)
-- **Strict Mode**: All bash files must include `set -euo pipefail`
-- **Shebang**: Only `#!/usr/bin/env bash` is allowed
-- **Code Checks**: Run `./check.sh` before committing (requires `shfmt`, `shellcheck`, `shellharden`)
+### Release
 
-### Release Process
+Tag with `v*` to trigger CI → CD:
 
-- Tag commits with `v*` pattern for releases
-- Example: `git tag v1` then `git push --tags`
+```sh
+git tag v2
+git push --tags
+```
 
 ### Contributors
 
@@ -447,4 +483,4 @@ See [CONTRIBUTORS.md](CONTRIBUTORS.md)
 
 ---
 
-For more information, visit: https://github.com/techno-tutors/tb2
+For more information: https://github.com/techno-tutors/tb2
