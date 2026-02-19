@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+#? Update tb2 to the latest version
+#? Usage: tb2 update
+
+set -euo pipefail
+
+. "$ROOT/utils.sh"
+
+META_CANDIDATES=(
+  "$ROOT/../.tb2meta"
+  "$HOME/.local/share/tb2/.tb2meta"
+  "/usr/local/share/tb2/.tb2meta"
+)
+
+SHARE_DIR=""
+BIN_DIR=""
+
+for meta in "${META_CANDIDATES[@]}"; do
+  if [ -f "$meta" ]; then
+    # shellcheck source=/dev/null
+    . "$meta"
+    break
+  fi
+done
+
+if [ -z "$SHARE_DIR" ] || [ ! -d "$SHARE_DIR" ]; then
+  error "Could not find tb2 installation metadata (.tb2meta)."
+  info "Please reinstall tb2 using install.sh"
+  exit 1
+fi
+
+info "Updating tb2 at: $SHARE_DIR"
+
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+log "Cloning latest version..."
+git clone --depth=1 https://github.com/techno-tutors/tb2.git "$TMP_DIR/tb2"
+
+CONFIG_FILE="$SHARE_DIR/script/subcmds/config.d/config.list"
+if [ -f "$CONFIG_FILE" ]; then
+  log "Backing up config..."
+  cp "$CONFIG_FILE" "$TMP_DIR/config.list.bak"
+fi
+
+log "Replacing files..."
+USE_SUDO=""
+if [ ! -w "$SHARE_DIR" ]; then
+  USE_SUDO="sudo"
+fi
+
+if [ -n "$USE_SUDO" ]; then
+  sudo cp -r "$TMP_DIR/tb2/." "$SHARE_DIR/"
+  sudo find "$SHARE_DIR/script" -type f -exec chmod 755 {} \;
+  echo "SHARE_DIR=$SHARE_DIR" | sudo tee "$SHARE_DIR/.tb2meta" >/dev/null
+  echo "BIN_DIR=$BIN_DIR"     | sudo tee -a "$SHARE_DIR/.tb2meta" >/dev/null
+else
+  cp -r "$TMP_DIR/tb2/." "$SHARE_DIR/"
+  find "$SHARE_DIR/script" -type f -exec chmod 755 {} \;
+  printf "SHARE_DIR=%s\nBIN_DIR=%s\n" "$SHARE_DIR" "$BIN_DIR" > "$SHARE_DIR/.tb2meta"
+fi
+
+if [ -f "$TMP_DIR/config.list.bak" ]; then
+  log "Restoring config..."
+  if [ -n "$USE_SUDO" ]; then
+    sudo cp "$TMP_DIR/config.list.bak" "$SHARE_DIR/script/subcmds/config.d/config.list"
+  else
+    cp "$TMP_DIR/config.list.bak" "$SHARE_DIR/script/subcmds/config.d/config.list"
+  fi
+fi
+
+info "tb2 updated successfully."
+exit 0

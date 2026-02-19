@@ -17,7 +17,8 @@ show_help() {
   log "  help     - Show this help"
   log "  exit     - Quit interactive mode"
   log "  quit     - same as exit"
-  echo
+  log "  update   - Update tb2 to latest version"
+  log "  uninstall- Remove tb2 from system"
 }
 
 interactive_book() {
@@ -138,4 +139,18 @@ interactive_project() {
       warn "Unknown project subcommand."
       ;;
   esac
+}
+
+interactive_update() {
+  info "Update tb2 to latest version?"
+  ans=""
+  ask ans "Proceed? (y/n)"
+  if [ "$ans" = "y" ] || [ "$ans" = "Y" ]; then
+    "$ROOT/tb2" update
+  fi
+}
+
+interactive_uninstall() {
+  warn "This will uninstall tb2 completely."
+  "$ROOT/tb2" uninstall
 }

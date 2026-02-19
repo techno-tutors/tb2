@@ -2,10 +2,11 @@
 #? Create a new page
 #? Usage: tb2 page new -c CHAPTERNAME -b BOOKNAME [-p PAGENAME] [-n chapterIssueNum]
 #? Opts:
-#?   -b         BOOKNAME
-#?   -c         CHAPTERNAME
-#?   -p         PAGENAME (optional, auto-numbered if not specified)
-#?   -n         PARENT(chapter) ISSUE NUMBER
+#?   -b         book name
+#?   -c         chapter name
+#?   -p         page name (optional, auto-numbered if not specified)
+#?   -n         parent(chapter) issue number
+#?   -t         with template
 #? config dependencies: GH_OWNER_NAME, GH_REPO_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 
 set -euo pipefail
@@ -16,8 +17,9 @@ bookName=""
 chapterName=""
 pageName=""
 chapterIssueNum=""
+useTemplate=false
 
-while getopts "b:c:p:n:" opt; do
+while getopts "b:c:p:n:t" opt; do
   case $opt in
   b)
     bookName="$OPTARG"
@@ -30,6 +32,10 @@ while getopts "b:c:p:n:" opt; do
     ;;
   n)
   	chapterIssueNum="$OPTARG"
+    ;;
+  t)
+    useTemplate=true
+    ;;
   \?)
     warn "Unknown option: -$OPTARG"
     log "Exit."
@@ -91,12 +97,22 @@ if [ -f "$pageFile" ]; then
   warn "Page file '$pageFile' already exists. Skipping creation."
 else
   log "Creating page file '$pageFile'..."
-  run touch "$pageFile"
+  if [ "$useTemplate" = "true" ]; then
+    tb2_applyTemplate "page" "$pageFile" "$bookName" "$chapterName" "$pageName"
+  else
+    touch "$pageFile"
+  fi
   log "done."
 fi
 log "Searching for parent chapter Issue..."
 if [ -z "$chapterIssueNum" ]; then
-  chapterIssueNum=$(gh issue list --repo "$name/$repoName" --search "title:\"Chapter: $chapterName\" \"($bookName)\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
+  if tb2_isManualMode; then
+    warn "Manual mode: cannot auto-find Chapter Issue. Use -n to specify issue number."
+  else
+    chapterIssueNum=$(gh issue list --repo "$name/$repoName" \
+      --search "title:\"Chapter: $chapterName\" \"($bookName)\"" \
+      --json number --jq '.[0].number' 2>/dev/null || echo "")
+  fi
 fi
 if [ -z "$chapterIssueNum" ]; then
   warn "Could not find Chapter Issue for '$chapterName'. Continuing without link."

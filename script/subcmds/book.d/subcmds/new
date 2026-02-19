@@ -2,8 +2,9 @@
 #? Create a new book project
 #? Usage: tb2 book new -b BOOKNAME [-a]
 #? Opts:
-#?   -b         BOOKNAME
+#?   -b         book name
 #?   -a         auto commit flag
+#?   -t         with template
 #? config dependencies: GH_OWNER_NAME,GH_REPO_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 set -euo pipefail
 
@@ -12,13 +13,17 @@ set -euo pipefail
 
 bookName=""
 autoCommit="n"
-while getopts "b:a" opt; do
+useTemplate=false
+while getopts "b:at" opt; do
   case $opt in
   b)
     bookName="$OPTARG"
     ;;
   a)
     autoCommit="y"
+    ;;
+  t)
+    useTemplate=true
     ;;
   \?)
     warn "Unknown option: -$OPTARG"
@@ -63,6 +68,11 @@ else
   }
 fi
 log "done."
+if useTemplate; then
+  log "Applying template..."
+  tb2_applyTemplate "book" "$srcDir/$bookName/intro.md" "$bookName" "" ""
+  log "done."
+fi
 ans="$autoCommit";
 if ! tb2_isManualMode; then
   ask ans "Do you want to commit&push the repository now draft branch? (y/n)"

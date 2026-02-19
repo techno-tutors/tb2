@@ -2,10 +2,11 @@
 #? Create a new chapter
 #? Usage: tb2 chapter new -c CHAPTERNAME -b BOOKNAME [-a] [-p]
 #? Opts:
-#?   -b         BOOKNAME
-#?   -c         CHAPTERNAME
-#?   -n         PARENT(book) ISSUE NUMBER
-#?   -a         auto commit flag
+#?   -b         book name
+#?   -c         chapter name
+#?   -n         parent(book) issue number
+#?   -a         auto commit
+#?   -t         with template
 #? config dependencies: GH_OWNER_NAME, MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 
 set -euo pipefail
@@ -17,7 +18,8 @@ bookName=""
 chapterName=""
 autoCommit="n"
 bookIssueNum=""
-while getopts "b:c:n:a" opt; do
+useTemplate=false
+while getopts "b:c:n:at" opt; do
   case $opt in
   b)
     bookName="$OPTARG"
@@ -30,6 +32,9 @@ while getopts "b:c:n:a" opt; do
     ;;
   a)
     autoCommit="y"
+    ;;
+  t)
+    useTemplate="true"
     ;;
   \?)
     warn "Unknown option: -$OPTARG"
@@ -96,7 +101,11 @@ else
   run mkdir -p "$chapterDir"
   log "done."
 fi
-
+if useTemplate; then
+  log "Applying template..."
+  tb2_applyTemplate "chapter" "${chapterDir}/intro.md" "$bookName" "$chapterName" ""
+  log "done."
+fi
 log "Creating GitHub issue for chapter..."
 run gh_createIssue "$name/$repoName" "Chapter: $chapterName" "$bookIssueBody"
 log "done."

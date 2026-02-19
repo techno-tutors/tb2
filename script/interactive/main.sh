@@ -38,6 +38,12 @@ while true; do
     "project")
       interactive_project
       ;;
+    "update")
+      interactive_update
+      ;;
+    "uninstall")
+      interactive_uninstall
+      ;;
     *)
       if [ -x "$ROOT/tb2" ]; then
         run "$ROOT/tb2" "$cmd"

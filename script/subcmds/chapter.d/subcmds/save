@@ -2,8 +2,8 @@
 #? Save a chapter (create pull request to draft branch)
 #? Usage: tb2 chapter save -c CHAPTERNAME -b BOOKNAME 
 #? Opts:
-#?   -b         BOOKNAME
-#?   -c         CHAPTERNAME
+#?   -b         book name
+#?   -c         chapter name
 #? config dependencies: GH_OWNER_NAME, TB2_OPERATION_BRANCH
 
 set -euo pipefail

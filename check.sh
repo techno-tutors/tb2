@@ -19,7 +19,7 @@ for cmd in shfmt shellcheck bash bashate checkbashisms; do
     exit 1
   fi
 done
-
+FILES=()
 while IFS= read -r -d '' file; do
     FILES+=("$file")
 done < <(find "$ROOT" -type f -name '*.sh' -print0)

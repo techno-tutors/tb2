@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+#? Uninstall tb2 from this system
+#? Usage: tb2 uninstall
+
+set -euo pipefail
+
+. "$ROOT/utils.sh"
+
+META_CANDIDATES=(
+  "$ROOT/../.tb2meta"
+  "$HOME/.local/share/tb2/.tb2meta"
+  "/usr/local/share/tb2/.tb2meta"
+)
+
+SHARE_DIR=""
+BIN_DIR=""
+
+for meta in "${META_CANDIDATES[@]}"; do
+  if [ -f "$meta" ]; then
+    # shellcheck source=/dev/null
+    . "$meta"
+    break
+  fi
+done
+
+if [ -z "$SHARE_DIR" ]; then
+  error "Could not find tb2 installation metadata."
+  exit 1
+fi
+
+warn "This will remove:"
+echo "  - $SHARE_DIR"
+echo "  - $BIN_DIR/tb2"
+
+ans=""
+ask ans "Are you sure you want to uninstall tb2? (y/n)"
+if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
+  info "Aborted."
+  exit 0
+fi
+
+USE_SUDO=""
+if [ ! -w "$SHARE_DIR" ]; then
+  USE_SUDO="sudo"
+fi
+
+if [ -n "$USE_SUDO" ]; then
+  sudo rm -f "$BIN_DIR/tb2"
+  sudo rm -rf "$SHARE_DIR"
+else
+  rm -f "$BIN_DIR/tb2"
+  rm -rf "$SHARE_DIR"
+fi
+
+info "tb2 uninstalled successfully."
+exit 0

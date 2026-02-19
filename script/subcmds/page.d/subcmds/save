@@ -2,9 +2,9 @@
 #? Save a page (commit and push)
 #? Usage: tb2 page save -c CHAPTERNAME -b BOOKNAME -p PAGENAME
 #? Opts:
-#?   -b         BOOKNAME
-#?   -c         CHAPTERNAME
-#?   -p         PAGENAME
+#?   -b         book name
+#?   -c         chapter name
+#?   -p         page name
 #?   -a         auto commit flag
 #? config dependencies: MDBOOK_SRC_DIR, TB2_OPERATION_BRANCH
 

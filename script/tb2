@@ -2,18 +2,21 @@
 
 set -euo pipefail
 
-ROOT="$(pwd)"
+ROOT="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 export ROOT
 . "$ROOT/utils.sh"
 
-if ! [ "$1" = "config" ] && ! mdbook_chkAvailable; then
-  log "Exit."
-  exit 1
-fi
-
-if ! gh_chkAvailable; then
-  log "Exit."
-  exit 1
+if ! [ "$1" = "config" ] && ! [ "$1" = "update" ] && ! [ "$1" = "uninstall" ]; then
+  if ! mdbook_chkAvailable; then
+    warn "this directory is not in mdbook."
+    log "Exit."
+    exit 1
+  fi
+  if ! gh_chkAvailable && tb2_isManualMode; then
+    warn "not installed gh. please install github cli or use manual mode."
+    log "Exit."
+    exit 1
+  fi
 fi
 
 case "${1:-}" in

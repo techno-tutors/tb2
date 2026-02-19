@@ -196,7 +196,11 @@ git_chkBranch() {
     else
       log "Branch '$branch' does not exist."
       ans=""
-      ask ans "Create branch[c] or Exit[e]?"
+      if tb2_isManualMode; then
+        ans="c"
+      else
+        ask ans "Create branch[c] or Exit[e]?"
+      fi
       if [ "$ans" = "c" ] || [ "$ans" = "C" ]; then
         run git switch -c "$branch"
         log "done."
@@ -212,4 +216,31 @@ git_chkBranch() {
     log "Already on branch '$branch'."
     log "done."
   fi
+}
+
+tb2_applyTemplate() {
+  local templateType="$1"  # book / chapter / page
+  local outFile="$2"
+  local bookName="${3:-}"
+  local chapterName="${4:-}"
+  local pageName="${5:-}"
+
+  local templateFile="$ROOT/subcmds/config.d/templates/$templateType.md"
+  local today
+  today="$(date +%Y-%m-%d)"
+
+  if [ ! -f "$templateFile" ]; then
+    warn "Template '$templateType.md' not found. Creating empty file."
+    touch "$outFile"
+    return 0
+  fi
+
+  sed \
+    -e "s/{{BOOK_NAME}}/$bookName/g" \
+    -e "s/{{CHAPTER_NAME}}/$chapterName/g" \
+    -e "s/{{PAGE_NAME}}/$pageName/g" \
+    -e "s/{{DATE}}/$today/g" \
+    "$templateFile" > "$outFile"
+
+  log "Template applied: $templateType -> $outFile"
 }
