@@ -75,13 +75,13 @@ log "Permissions applied"
 
 step 6 $TOTAL
 info "Selecting installation target"
-echo " 0) /usr/local/bin + /usr/local/share"
-echo " 1) ~/.local/bin + ~/.local/share"
+echo " 0) /usr/local/bin + /usr/local/share  (system-wide, requires sudo)"
+echo " 1) ~/.local/bin + ~/.local/share      (current user only)"
 
 choice=""
 ask choice "Choose installation target (0 or 1)"
 if [ "$choice" != "0" ] && [ "$choice" != "1" ]; then
-  error "Invalid choice"
+  error "Invalid choice: '$choice'"
   exit 1
 fi
 
@@ -90,33 +90,56 @@ if [ "$choice" = "0" ]; then
   info "Preparing system-wide directories"
   run sudo mkdir -p /usr/local/share/tb2
   run sudo mkdir -p /usr/local/bin
+  SHARE_DIR="/usr/local/share/tb2"
+  BIN_DIR="/usr/local/bin"
+  USE_SUDO="sudo"
 else
   info "Preparing user directories"
   run mkdir -p ~/.local/share/tb2
   run mkdir -p ~/.local/bin
+  SHARE_DIR="$HOME/.local/share/tb2"
+  BIN_DIR="$HOME/.local/bin"
+  USE_SUDO=""
 fi
 
 step 8 $TOTAL
 info "Copying tb2 files"
 if [ "$choice" = "0" ]; then
-  run sudo cp -r ./* /usr/local/share/tb2/
+  run sudo cp -r ./* "$SHARE_DIR/"
 else
-  run cp -r ./* ~/.local/share/tb2/
+  run cp -r ./* "$SHARE_DIR/"
 fi
 
 step 9 $TOTAL
-info "Permission setting..."
-run sudo chmod -R a+rx /usr/local/share/tb2
-
+info "Setting permissions..."
+if [ "$choice" = "0" ]; then
+  run sudo chmod -R a+rx "$SHARE_DIR"
+else
+  run chmod -R u+rx "$SHARE_DIR"
+fi
 
 step 10 $TOTAL
 info "Creating symlink"
 if [ "$choice" = "0" ]; then
-  run sudo ln -sf /usr/local/share/tb2/script/tb2 /usr/local/bin/tb2
+  run sudo ln -sf "$SHARE_DIR/script/tb2" "$BIN_DIR/tb2"
 else
-  run ln -sf ~/.local/share/tb2/script/tb2 ~/.local/bin/tb2
+  run ln -sf "$SHARE_DIR/script/tb2" "$BIN_DIR/tb2"
 fi
 
 step 11 $TOTAL
+info "Verifying installation..."
+if ! command -v tb2 >/dev/null 2>&1; then
+  warn "tb2 is not in PATH yet."
+  if [ "$choice" = "1" ]; then
+    warn "Make sure '$BIN_DIR' is in your PATH."
+    warn "Add the following to your shell config (~/.bashrc, ~/.zshrc, etc.):"
+    printf "%b" "  ${BOLD}export PATH=\"\$HOME/.local/bin:\$PATH\"${RESET}\n"
+  fi
+else
+  info "tb2 successfully installed at: $(command -v tb2)"
+fi
+
+log ""
 log "Installation complete."
+log "Run 'tb2 --help' to get started."
 exit 0

@@ -47,7 +47,7 @@ if [ -z "${bookName}" ] || [ -z "${chapterName}" ]; then
   log "Exit."
   exit 1
 fi
-if [ -z "${bookIssueNum}"] && tb2_isManualMode; then
+if [ -z "${bookIssueNum}" ] && tb2_isManualMode; then
   warn "-n is required in manual mode."
   log "Exit."
   exit 1
@@ -57,6 +57,7 @@ log "Checking for config..."
 useConf GH_OWNER_NAME name
 useConf MDBOOK_SRC_DIR srcDir
 useConf TB2_OPERATION_BRANCH branch
+useConf GH_REPO_NAME repoName
 
 
 log "done."

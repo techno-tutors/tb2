@@ -48,7 +48,7 @@ if  [ -z "${bookName}" ] || [ -z "${chapterName}" ]; then
   log "Exit."
   exit 1
 fi
-if [ -z "${chapterIssueNum}"] && tb2_isManualMode; then
+if [ -z "${chapterIssueNum}" ] && tb2_isManualMode; then
   warn "-n is required in manual mode."
   log "Exit."
   exit 1
@@ -78,7 +78,7 @@ if [ -z "$pageName" ]; then
   log "Auto-generating page name..."
   pageNum=1
   while [ -f "$chapterDir/p$pageNum.md" ]; do
-    ((pageNum++))
+    pageNum=$((pageNum + 1))
   done
   pageName="p$pageNum"
   info "Generated page name: $pageName"
@@ -94,7 +94,6 @@ else
   run touch "$pageFile"
   log "done."
 fi
-if 
 log "Searching for parent chapter Issue..."
 if [ -z "$chapterIssueNum" ]; then
   chapterIssueNum=$(gh issue list --repo "$name/$repoName" --search "title:\"Chapter: $chapterName\" \"($bookName)\"" --json number --jq '.[0].number' 2>/dev/null || echo "")

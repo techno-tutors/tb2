@@ -31,6 +31,7 @@ while getopts "b:c:p:a" opt; do
     ;;
   a)
     autoCommit="y"
+    ;;
   \?)
     warn "Unknown option: -$OPTARG"
     exit 1
