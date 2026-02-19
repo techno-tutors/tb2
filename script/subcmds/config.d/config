@@ -2,16 +2,17 @@
 #? Configuration management for tb2
 #? Usage: tb2 config <subcmd> [options]
 #? Subcommands:
-#?   set KEY VALUE      Set a configuration value
+#?   list               List all configuration values
 #?   get KEY            Get a configuration value
+#?   set KEY VALUE      Set a configuration value
 #? Keys:
-#?   GH_OWNER_NAME           GitHub owner/organization name
-#?   GH_REPO_NAME						 GitHub repository name
-#?   MDBOOK_SRC_DIR          mdBook source directory
-#?   TB2_OPERATION_BRANCH    Branch name for operations
+#?   GH_OWNER_NAME        GitHub owner/organization name
+#?   GH_REPO_NAME         GitHub repository name
+#?   MDBOOK_SRC_DIR       mdBook source directory
+#?   TB2_OPERATION_BRANCH Branch name for operations
+#?   GH_CLI_MODE          GitHub CLI mode (auto|manual)
 
 set -euo pipefail
-
 
 . "$ROOT/utils.sh"
 
@@ -19,61 +20,38 @@ CONFIG_FILE="$ROOT/subcmds/config.d/config.list"
 
 if [ ! -f "$CONFIG_FILE" ]; then
   error "Config file not found: $CONFIG_FILE"
-  echo
   exit 2
 fi
+
 . "$CONFIG_FILE"
+
+ALL_KEYS="GH_OWNER_NAME GH_REPO_NAME MDBOOK_SRC_DIR TB2_OPERATION_BRANCH GH_CLI_MODE"
 
 getConf() {
   local key="$1"
   case "$key" in
-  "GH_OWNER_NAME")
-    echo "$GH_OWNER_NAME"
-    ;;
-	"GH_REPO_NAME")
-    echo "$GH_REPO_NAME"
-    ;;
-  "MDBOOK_SRC_DIR")
-    echo "$MDBOOK_SRC_DIR"
-    ;;
-  "TB2_OPERATION_BRANCH")
-    echo "$TB2_OPERATION_BRANCH"
-    ;;
-	"GH_CLI_MODE")
-	  echo "$GH_CLI_MODE"
-  	;;
+  GH_OWNER_NAME)           echo "$GH_OWNER_NAME" ;;
+  GH_REPO_NAME)            echo "$GH_REPO_NAME" ;;
+  MDBOOK_SRC_DIR)          echo "$MDBOOK_SRC_DIR" ;;
+  TB2_OPERATION_BRANCH)    echo "$TB2_OPERATION_BRANCH" ;;
+  GH_CLI_MODE)             echo "$GH_CLI_MODE" ;;
   *)
     warn "Unknown key: $key"
-    echo
     return 1
     ;;
   esac
 }
+
 setConf() {
   local key="$1"
   local value="$2"
 
-  if [ ! -f "$CONFIG_FILE" ]; then
-    warn "Config file not found: $CONFIG_FILE"
-    exit 1
-  fi
-
   case "$key" in
-  "GH_OWNER_NAME")
-    sed -i.bak "s|^GH_OWNER_NAME=.*$|GH_OWNER_NAME=\"$value\"|" "$CONFIG_FILE"
+  GH_OWNER_NAME | GH_REPO_NAME | MDBOOK_SRC_DIR | TB2_OPERATION_BRANCH | GH_CLI_MODE)
+    sed -i.bak "s|^${key}=.*$|${key}=\"${value}\"|" "$CONFIG_FILE"
+    rm -f "${CONFIG_FILE}.bak"
+    success "Set $key = $value"
     ;;
-  "GH_REPO_NAME")
-    sed -i.bak "s|^GH_REPO_NAME=.*$|GH_REPO_NAME=\"$value\"|" "$CONFIG_FILE"
-    ;;
-  "MDBOOK_SRC_DIR")
-    sed -i.bak "s|^MDBOOK_SRC_DIR=.*$|MDBOOK_SRC_DIR=\"$value\"|" "$CONFIG_FILE"
-    ;;
-  "TB2_OPERATION_BRANCH")
-    sed -i.bak "s|^TB2_OPERATION_BRANCH=.*$|TB2_OPERATION_BRANCH=\"$value\"|" "$CONFIG_FILE"
-    ;;
-	"GH_CLI_MODE")
-  	sed -i.bak "s|^GH_CLI_MODE=.*$|GH_CLI_MODE=\"$value\"|" "$CONFIG_FILE"
-  	;;
   *)
     warn "Unknown key: $key"
     return 1
@@ -81,26 +59,41 @@ setConf() {
   esac
 }
 
+listConf() {
+  info "tb2 Configuration"
+  echo "  File: $CONFIG_FILE"
+  echo ""
+  local maxlen=0
+  for key in $ALL_KEYS; do
+    [ ${#key} -gt $maxlen ] && maxlen=${#key}
+  done
+  for key in $ALL_KEYS; do
+    local val
+    val="$(getConf "$key" 2>/dev/null || echo "(not set)")"
+    printf "  %-${maxlen}s  =  %s\n" "$key" "$val"
+  done
+}
+
 case "${1:-}" in
+list)
+  listConf
+  ;;
 get)
   if [ $# -lt 2 ]; then
-    error "Key required for 'get' subcommand"
-    echo
+    error "Key required for 'get'"
     exit 1
   fi
   getConf "$2"
   ;;
 set)
   if [ $# -lt 3 ]; then
-    error "Key and value required for 'set' subcommand"
-    echo
+    error "Key and value required for 'set'"
     exit 1
   fi
   setConf "$2" "$3"
   ;;
 *)
-  warn "Unknown subcommand: $1"
-  echo
+  warn "Unknown subcommand: ${1:-}"
   exit 1
   ;;
 esac

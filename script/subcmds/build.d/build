@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+#? Build mdBook project
+#? Usage: tb2 book build [-b BOOKNAME] [--open] [--dest DIR]
+#? Opts:
+#?   -b BOOKNAME   Build only a specific book (if multi-book layout)
+#?   --open        Open the built book in browser after build
+#?   --dest DIR    Output directory (default: book/)
+#? config dependencies: MDBOOK_SRC_DIR
+
+set -euo pipefail
+
+. "$ROOT/utils.sh"
+
+bookName=""
+openAfter=false
+destDir=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -b)
+    shift
+    bookName="$1"
+    ;;
+  --open)
+    openAfter=true
+    ;;
+  --dest)
+    shift
+    destDir="$1"
+    ;;
+  *)
+    warn "Unknown option: $1"
+    exit 1
+    ;;
+  esac
+  shift
+done
+
+projectRoot="${TB2_PROJECT_ROOT:-$(tb2_findRoot 2>/dev/null || pwd)}"
+
+info "Building mdBook project at: $projectRoot"
+
+cd "$projectRoot"
+
+buildArgs=(mdbook build)
+[ -n "$destDir" ] && buildArgs+=(--dest-dir "$destDir")
+
+if [ -n "$bookName" ]; then
+  useConf MDBOOK_SRC_DIR srcDir
+  bookToml="$srcDir/$bookName/book.toml"
+  if [ -f "$bookToml" ]; then
+    info "Building book: $bookName"
+    buildArgs+=("$srcDir/$bookName")
+  else
+    warn "No separate book.toml found for '$bookName'. Building root project."
+  fi
+fi
+
+run "${buildArgs[@]}"
+
+if [ "$openAfter" = true ]; then
+  builtDir="${destDir:-book}"
+  indexFile="$projectRoot/$builtDir/index.html"
+  if [ -f "$indexFile" ]; then
+    info "Opening $indexFile ..."
+    if command -v xdg-open >/dev/null 2>&1; then
+      xdg-open "$indexFile"
+    elif command -v open >/dev/null 2>&1; then
+      open "$indexFile"
+    else
+      warn "Cannot open browser automatically. Open manually: $indexFile"
+    fi
+  else
+    warn "Built index not found at $indexFile"
+  fi
+fi
+
+success "Build complete."
+exit 0

@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+#? Show project status: page counts, empty files, missing issues, open PRs
+#? Usage: tb2 status [-b BOOKNAME] [--remote]
+#? Opts:
+#?   -b BOOKNAME   Limit to a specific book
+#?   --remote      Also check GitHub Issues and PRs (requires gh)
+#? config dependencies: MDBOOK_SRC_DIR, GH_OWNER_NAME, GH_REPO_NAME
+
+set -euo pipefail
+
+. "$ROOT/utils.sh"
+
+bookFilter=""
+checkRemote=false
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  -b)
+    shift
+    bookFilter="$1"
+    ;;
+  --remote)
+    checkRemote=true
+    ;;
+  *)
+    warn "Unknown option: $1"
+    exit 1
+    ;;
+  esac
+  shift
+done
+
+useConf MDBOOK_SRC_DIR srcDir
+useConf GH_OWNER_NAME ghOwner
+useConf GH_REPO_NAME ghRepo
+
+projectRoot="${TB2_PROJECT_ROOT:-$(tb2_findRoot 2>/dev/null || pwd)}"
+fullSrcDir="$projectRoot/$srcDir"
+
+totalBooks=0
+totalChapters=0
+totalPages=0
+emptyPages=()
+missingReadme=()
+orphanDirs=()
+
+BOLD_BLUE="${ESC}${BOLD}${BLUE}"
+
+section() { printf "%b" "\n${BLUE}${BOLD}══ $1 ══${RESET}\n"; }
+row()     { printf "  %-30s %s\n" "$1" "$2"; }
+
+section "Local Structure ($fullSrcDir)"
+
+if [ ! -d "$fullSrcDir" ]; then
+  warn "Source directory '$fullSrcDir' does not exist."
+  exit 1
+fi
+
+shopt -s nullglob
+
+for bookPath in "$fullSrcDir"/*/; do
+  [ -d "$bookPath" ] || continue
+  bookName="$(basename "$bookPath")"
+  [ -n "$bookFilter" ] && [ "$bookName" != "$bookFilter" ] && continue
+
+  totalBooks=$((totalBooks + 1))
+  bookChapters=0
+  bookPages=0
+  bookEmpty=0
+
+  if [ ! -f "$bookPath/README.md" ] && [ ! -f "$bookPath/intro.md" ] && [ ! -f "$bookPath/index.md" ]; then
+    missingReadme+=("$bookName")
+  fi
+
+  for chapterPath in "$bookPath"*/; do
+    [ -d "$chapterPath" ] || continue
+    chapterName="$(basename "$chapterPath")"
+    totalChapters=$((totalChapters + 1))
+    bookChapters=$((bookChapters + 1))
+    chapterPages=0
+
+    mdFiles=("$chapterPath"*.md)
+    if [ ${#mdFiles[@]} -eq 0 ]; then
+      orphanDirs+=("$bookName/$chapterName")
+    fi
+
+    for pagePath in "${mdFiles[@]}"; do
+      [ -f "$pagePath" ] || continue
+      totalPages=$((totalPages + 1))
+      bookPages=$((bookPages + 1))
+      chapterPages=$((chapterPages + 1))
+
+      if [ ! -s "$pagePath" ]; then
+        emptyPages+=("$bookName/$chapterName/$(basename "$pagePath")")
+        bookEmpty=$((bookEmpty + 1))
+      else
+        wc_result="$(wc -l < "$pagePath")"
+        if [ "$wc_result" -lt 3 ]; then
+          emptyPages+=("$bookName/$chapterName/$(basename "$pagePath") (stub: ${wc_result}L)")
+          bookEmpty=$((bookEmpty + 1))
+        fi
+      fi
+    done
+
+    printf "  [bok]%-20s [chap]%-20s pages: %d\n" "$bookName" "$chapterName" "$chapterPages"
+  done
+
+  printf "  %b%-20s%b  chapters: %d  pages: %d  empty/stub: %d\n" \
+    "${BLUE}${BOLD}" "$bookName" "${RESET}" "$bookChapters" "$bookPages" "$bookEmpty"
+done
+
+shopt -u nullglob
+
+section "Summary"
+row "Books:"    "$totalBooks"
+row "Chapters:" "$totalChapters"
+row "Pages:"    "$totalPages"
+
+if [ ${#emptyPages[@]} -gt 0 ]; then
+  section "⚠ Empty / Stub Pages (${#emptyPages[@]})"
+  for p in "${emptyPages[@]}"; do
+    echo "  - $p"
+  done
+fi
+
+if [ ${#missingReadme[@]} -gt 0 ]; then
+  section "⚠ Books Missing README/intro.md (${#missingReadme[@]})"
+  for b in "${missingReadme[@]}"; do
+    echo "  - $b"
+  done
+fi
+
+if [ ${#orphanDirs[@]} -gt 0 ]; then
+  section "⚠ Empty Chapter Directories (${#orphanDirs[@]})"
+  for d in "${orphanDirs[@]}"; do
+    echo "  - $d"
+  done
+fi
+
+if [ "$checkRemote" = true ]; then
+  if tb2_isManualMode; then
+    warn "--remote skipped: GH_CLI_MODE is manual."
+  else
+    section "Remote GitHub Status"
+
+    info "Open Issues:"
+    gh_findIssue "$ghOwner/$ghRepo" "Book: OR Chapter: OR Page:" "open" 2>/dev/null \
+      | head -30 \
+      | sed 's/^/  /' \
+      || echo "  (none or gh error)"
+
+    info "Open Pull Requests:"
+    gh pr list --repo "$ghOwner/$ghRepo" \
+      --json number,title,headRefName,state \
+      --jq '.[] | "  #\(.number) [\(.headRefName)] \(.title)"' 2>/dev/null \
+      || echo "  (none or gh error)"
+  fi
+fi
+
+section "Done"
+exit 0
